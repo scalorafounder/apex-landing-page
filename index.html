@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Deal Wholesale by APEX — CRM & Deal Management Software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{background:#050208;overflow-x:hidden;font-family:'Outfit',sans-serif}#root{min-height:100vh}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const ROTATE_WORDS = [
+  { text: "CRM", color: "#a78bfa" },
+  { text: "Pipeline", color: "#c9a227" },
+  { text: "Phone System", color: "#ef4444" },
+  { text: "Deal Tracking", color: "#3b82f6" },
+  { text: "Follow-Ups", color: "#34d399" },
+  { text: "Contact Manager", color: "#f97316" },
+  { text: "Call Logging", color: "#ec4899" },
+  { text: "E-Signing", color: "#06b6d4" },
+  { text: "SMS Blasting", color: "#8b5cf6" },
+];
+
+const RotatingText = () => {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % ROTATE_WORDS.length), 1800);
+    return () => clearInterval(t);
+  }, []);
+  const w = ROTATE_WORDS[idx];
+  return <span key={idx} className="rotate-word" style={{ color: w.color }}>{w.text}</span>;
+};
+
+const Check = ({ color = "#a78bfa" }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+    <circle cx="12" cy="12" r="11" fill={color} opacity=".15" />
+    <path d="M8 12l3 3 5-5" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+function App() {
+  const [billing, setBilling] = useState("monthly");
+  const [openFaq, setOpenFaq] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [showSticky, setShowSticky] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowSticky(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+
+  useEffect(() => {
+    if (document.getElementById("apex-css")) return;
+    const s = document.createElement("style");
+    s.id = "apex-css";
+    s.textContent = [
+      "::selection{background:#7c3aed;color:#fff}",
+      "::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0a0610}::-webkit-scrollbar-thumb{background:#2a1f45;border-radius:3px}",
+      "@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}",
+      "@keyframes rotateIn{from{opacity:0;transform:translateY(20px) rotateX(-30deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}",
+      "@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}",
+      "@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(124,58,237,.15)}50%{box-shadow:0 0 40px rgba(124,58,237,.3)}}",
+      "@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}",
+      "@keyframes slideInBottom{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}",
+      "@keyframes sparkle{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}",
+      "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}",
+      "@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}",
+      ".rotate-word{display:inline-block;animation:rotateIn .4s ease both;font-family:'Manrope',sans-serif}",
+      ".fade-up{animation:fadeInUp .6s ease both}",
+      ".shimmer-btn{background:linear-gradient(90deg,#7c3aed 0%,#a78bfa 50%,#7c3aed 100%);background-size:200% 100%;animation:shimmer 2.5s ease-in-out infinite}",
+      ".glow-card{animation:glow 3s ease-in-out infinite}",
+      ".feature-card{transition:all .3s ease;border:1px solid #1e1635}",
+      ".feature-card:hover{border-color:#7c3aed;transform:translateY(-6px);box-shadow:0 12px 40px rgba(124,58,237,.15)}",
+      ".pricing-card{transition:all .3s ease}.pricing-card:hover{transform:translateY(-4px)}",
+      ".faq-btn{transition:all .2s}.faq-btn:hover{background:#1a1230!important}",
+      ".cta-btn{transition:all .2s ease}.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.3)}",
+      ".tab-btn{transition:all .2s}",
+      ".cost-row{transition:background .2s}.cost-row:hover{background:rgba(124,58,237,.06)!important}",
+      ".sticky-bar{animation:slideInBottom .4s ease both}",
+      ".ticker-track{display:flex;animation:ticker 28s linear infinite;width:max-content}.ticker-track:hover{animation-play-state:paused}",
+      ".sparkle{animation:sparkle 2s ease-in-out infinite}",
+      ".testimonial-card{transition:all .3s ease;border:1px solid #1e1635}.testimonial-card:hover{border-color:#7c3aed40;transform:scale(1.02);box-shadow:0 8px 32px rgba(124,58,237,.1)}",
+      ".modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px}",
+      ".modal-box{background:#0e0a1a;border:1px solid #2a1f45;border-radius:20px;max-width:620px;width:100%;max-height:85vh;overflow-y:auto;animation:modalIn .3s ease both}",
+      ".terms-link{color:#a78bfa;cursor:pointer;text-decoration:underline;text-underline-offset:2px}",
+      ".terms-link:hover{color:#c4b5fd}",
+      "@media(max-width:900px){.hero-title{font-size:36px!important}.grid-2{grid-template-columns:1fr!important}.grid-3{grid-template-columns:1fr!important}.grid-4{grid-template-columns:1fr 1fr!important}.nav-links{display:none!important}.cost-table{font-size:12px!important}.pricing-grid{grid-template-columns:1fr!important}.sticky-bar{display:none!important}.ticker-wrap{display:none!important}}"
+    ].join("");
+    document.head.appendChild(s);
+  }, []);
+
+  const font = "'Outfit',sans-serif";
+  const C = {
+    bg:"#050208",card:"#0e0a1a",border:"#1e1635",borderLight:"#2a1f45",
+    purple:"#7c3aed",purpleLight:"#a78bfa",accent:"#c9a227",green:"#34d399",
+    red:"#ef4444",blue:"#3b82f6",orange:"#f97316",pink:"#ec4899",cyan:"#06b6d4",
+    white:"#fff",text:"#e0dce8",muted:"#8a8098",dim:"#5a5070",
+  };
+
+  const Section = ({ children, id, dark, style }) => (
+    <section id={id} style={{ padding:"100px 24px",maxWidth:1200,margin:"0 auto",...(dark?{maxWidth:"100%",background:"#0a0612"}:{}),...style }}>
+      {dark ? <div style={{ maxWidth:1200,margin:"0 auto" }}>{children}</div> : children}
+    </section>
+  );
+
+  const SectionLabel = ({ children, color=C.purple }) => (
+    <div style={{ display:"inline-flex",alignItems:"center",gap:8,padding:"6px 16px",borderRadius:100,border:`1px solid ${color}30`,background:`${color}10`,fontSize:13,fontWeight:700,color,letterSpacing:".04em",textTransform:"uppercase",marginBottom:16,fontFamily:font }}>{children}</div>
+  );
+
+  const SectionTitle = ({ children }) => (
+    <h2 style={{ fontFamily:"'Manrope',sans-serif",fontSize:"clamp(28px,4vw,48px)",fontWeight:800,color:C.white,lineHeight:1.1,marginBottom:16,letterSpacing:"-0.02em" }}>{children}</h2>
+  );
+
+  const CTA = ({ children, large, outline, style, ...p }) => (
+    <button {...p} className={outline ? "cta-btn" : "cta-btn shimmer-btn"} style={{
+      padding: large ? "18px 40px" : "14px 28px", borderRadius:12,
+      border: outline ? `2px solid ${C.border}` : "none",
+      background: outline ? "transparent" : undefined,
+      color:C.white, fontSize: large ? 16 : 14, fontWeight:700,
+      fontFamily:font, cursor:"pointer", letterSpacing:".02em",
+      textTransform:"uppercase", ...style,
+    }}>{children}</button>
+  );
+
+  const handlePurchase = () => {
+    if (billing === "monthly") {
+      window.open("https://buy.stripe.com/7sY7sM7Ma5iN9it6kX93y07", "_blank");
+    } else {
+      window.open("https://buy.stripe.com/eVq14ogiG3aF3Y9gZB93y08", "_blank");
+    }
+  };
+
+  const featureTabs = [
+    {
+      label:"CRM", icon:"📊",
+      title:"Full Pipeline CRM Built for Wholesalers",
+      desc:"Stop using spreadsheets. Our CRM tracks every deal from first contact to closed sale with automated follow-ups, call tracking, and a visual pipeline you can manage in seconds. Built on GoHighLevel — the same platform used by 8-figure operations.",
+      features:["Visual deal pipeline (drag & drop)","Automated follow-up sequences","Full contact & lead management","Deal stage tracking & notes","SMS & email blasting built in"],
+    },
+    {
+      label:"Phone System", icon:"📞",
+      title:"Built-In Phone System & Call Tracking",
+      desc:"Make and receive calls directly inside your dashboard. Every call is logged, recorded, and tied to the right contact automatically. No third-party dialer needed — it's all built in so you never lose track of a conversation.",
+      features:["Built-in dialer — no extra software","Automatic call recording & logging","Voicemail drops & call queues","Call tracking per contact & deal","Two-way SMS from your dashboard"],
+    },
+    {
+      label:"Contracts", icon:"✍️",
+      title:"E-Signing & Contract Templates",
+      desc:"Send, sign, and store contracts without ever leaving the platform. Pre-built wholesale contract templates are ready to use — just fill in the details and send. Legally binding e-signatures with full audit trail.",
+      features:["Pre-built wholesale contract templates","One-click e-sign requests","Full legal audit trail","Sign from any device","Stored directly to the deal record"],
+    },
+    {
+      label:"Automations", icon:"🔁",
+      title:"Automated Follow-Ups & Smart Campaigns",
+      desc:"Build drip sequences, SMS blasts, and email campaigns that run 24/7. Set up your follow-up once and let the system work your leads automatically — so no motivated seller ever slips through the cracks.",
+      features:["Drip sequences via SMS & email","Smart list segmentation","Voicemail drop campaigns","Bulk email & SMS blasting","Full automation builder"],
+    },
+  ];
+
+  const costRows = [
+    { feature:"Full CRM + Pipeline Management", them:"$120/mo", icon:"📊" },
+    { feature:"Built-in Phone System", them:"$99/mo", icon:"📞" },
+    { feature:"Call Recording & Logging", them:"$49/mo", icon:"🎙️" },
+    { feature:"SMS & Email Blasting", them:"$97/mo", icon:"📨" },
+    { feature:"E-Signing Contracts", them:"$40/mo", icon:"✍️" },
+    { feature:"Contract & Offer Templates", them:"$47/mo", icon:"📋" },
+    { feature:"Automated Follow-Up Sequences", them:"$79/mo", icon:"🔁" },
+    { feature:"Private Mastermind Community", them:"$97/mo", icon:"💬" },
+  ];
+  const totalThem = "$628/mo";
+
+  const plan = {
+    name:"Apex Real Estate Investors CRM",
+    priceMonthly:"$29", priceAnnual:"$290",
+    perMonthly:"/mo", perAnnual:"/yr",
+    desc:"CRM, phone system, and deal management for wholesalers. Everything in one platform.",
+    features:[
+      "Full CRM + Pipeline Management",
+      "Built-in Phone System & Dialer",
+      "Call Recording & Logging",
+      "Automated Follow-Up Sequences",
+      "SMS & Email Blasting",
+      "E-Signing Contracts Built In",
+      "Contract & Offer Templates",
+      "Two-Way SMS from Dashboard",
+      "Voicemail Drops",
+      "Deal Stage Tracking",
+      "Smart List Segmentation",
+      "Private Discord Community",
+    ],
+  };
+
+  const valueStack = [
+    { item:"Full CRM + Pipeline System", value:"$1,440/yr", icon:"📊" },
+    { item:"Built-in Phone System", value:"$1,188/yr", icon:"📞" },
+    { item:"Call Recording & Tracking", value:"$588/yr", icon:"🎙️" },
+    { item:"SMS & Email Blaster", value:"$1,164/yr", icon:"📨" },
+    { item:"E-Signing + Contract Templates", value:"$1,044/yr", icon:"✍️" },
+    { item:"Automated Follow-Up Sequences", value:"$948/yr", icon:"🔁" },
+    { item:"Private Mastermind Community", value:"$1,164/yr", icon:"💬" },
+  ];
+  const totalValue = "$7,500+";
+
+  const testimonials = [
+    { q:"I closed my first wholesale deal in under 90 days using APEX. The CRM kept me organized and the follow-up sequences did the work while I slept. Never thought I'd close this fast.", name:"Marcus T.", role:"Wholesaler · Atlanta, GA", result:"$18,500 in 90 days" },
+    { q:"Once I set up the automated follow-ups, deals started coming back to me that I thought were dead. The phone system logging every call made all the difference in staying on top of sellers.", name:"Danielle R.", role:"Wholesaler · Tampa, FL", result:"$22,000 in 60 days" },
+    { q:"The contract templates are lawyer-approved and ready to go. I used to waste hours on paperwork. Now I send a contract in under two minutes and get it back signed the same day.", name:"Chris W.", role:"Wholesaler · Houston, TX", result:"$16,000 in 45 days" },
+    { q:"I joined with zero deals. The CRM walked me through every step and the community answered every question I had. By month three I had two assignments closed and money in my pocket.", name:"Jaylen K.", role:"Wholesaler · Detroit, MI", result:"$14,000 in 75 days" },
+  ];
+
+  const faqs = [
+    { q:"What exactly is included for $29/month?", a:"Everything in the platform: Full CRM with visual pipeline, built-in phone system with call recording and voicemail drops, automated follow-up sequences, SMS & email blasting, e-signing contracts, lawyer-approved contract templates, smart list segmentation, and private Discord community. No upsells, no locked features." },
+    { q:"Are there any extra costs I should know about?", a:"The $29/month covers the platform. Phone calls are billed at roughly $0.02/minute through the system — we recommend budgeting about $30/month for phone usage depending on your volume. A custom domain for your website runs about $15/year if you want one. Everything else is included." },
+    { q:"Is there a free trial?", a:"There is no free trial — we keep pricing low so you can get started without risk. At $29/month, you're covered for less than a dollar a day. If the platform isn't for you, cancel anytime." },
+    { q:"What is your refund policy?", a:"All sales are final. We do not offer refunds once access has been granted. By purchasing, you authorize the charge and agree to our Terms of Service & Refund Policy. If you experience a technical issue where the platform is not delivered as described, contact us and we will make it right." },
+    { q:"Do I need experience to get started?", a:"No. The CRM is built to guide you through every deal stage. Automated follow-ups keep your leads warm, lawyer-approved contracts are ready to use, and the community is there to answer questions every step of the way." },
+    { q:"How is APEX different from other wholesaling CRMs?", a:"Most wholesaling CRMs make you bolt on 5 separate tools — a dialer, a contract system, an email platform, a follow-up tool, and more — often costing $500+/month. APEX bundles everything into one platform built specifically for wholesalers at $29/month." },
+    { q:"Can I cancel anytime?", a:"Yes. No contracts, no commitments. Cancel your subscription anytime from your account dashboard. Your access continues through the end of your billing period." },
+  ];
+
+  const TermsModal = () => (
+    <div className="modal-overlay" onClick={() => setShowTerms(false)}>
+      <div className="modal-box" onClick={e => e.stopPropagation()}>
+        <div style={{ padding:"32px 32px 0",position:"sticky",top:0,background:"#0e0a1a",zIndex:1,borderBottom:`1px solid ${C.border}`,marginBottom:0,paddingBottom:20 }}>
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+            <h2 style={{ fontFamily:"'Manrope',sans-serif",fontSize:20,fontWeight:800,color:C.white }}>Terms of Service & Refund Policy</h2>
+            <button onClick={() => setShowTerms(false)} style={{ background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:22,lineHeight:1,padding:"4px 8px" }}>✕</button>
+          </div>
+          <p style={{ fontSize:12,color:C.dim,marginTop:6 }}>Real Deal Wholesale by APEX · Last updated March 2026</p>
+        </div>
+        <div style={{ padding:"24px 32px 32px",fontSize:14,color:C.muted,lineHeight:1.85 }}>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>1. Acceptance of Terms</p>
+          <p style={{ marginBottom:20 }}>By purchasing a subscription to Real Deal Wholesale by APEX ("APEX", "we", "us"), you agree to be bound by these Terms of Service in full. If you do not agree to these terms, do not complete your purchase. These terms constitute a legally binding agreement between you and Real Deal Wholesale by APEX.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>2. Authorized Recurring Charge</p>
+          <p style={{ marginBottom:20 }}>By completing your purchase, you expressly authorize Real Deal Wholesale by APEX to charge your payment method the subscription amount ($29.00/month or $290.00/year, depending on your selected plan) on a recurring basis. This charge will automatically renew at the end of each billing period until you cancel. You acknowledge that this is a recurring subscription and not a one-time payment. You are responsible for ensuring your payment method remains valid. Failure to maintain a valid payment method may result in suspension of your access.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>3. No Refund Policy</p>
+          <p style={{ marginBottom:12 }}>All sales are final. Real Deal Wholesale by APEX does not offer refunds for any reason once platform access has been granted. This includes, but is not limited to:</p>
+          <ul style={{ paddingLeft:20,marginBottom:12 }}>
+            <li style={{ marginBottom:6 }}>Change of mind or dissatisfaction with the platform</li>
+            <li style={{ marginBottom:6 }}>Lack of use or inactivity during the subscription period</li>
+            <li style={{ marginBottom:6 }}>Dissatisfaction with business results or deal outcomes</li>
+            <li style={{ marginBottom:6 }}>Technical difficulties not caused by our platform infrastructure</li>
+            <li style={{ marginBottom:6 }}>Accidental purchase</li>
+          </ul>
+          <p style={{ marginBottom:20 }}>By completing your purchase, you expressly waive your right to initiate a chargeback with your bank or card issuer except in cases where the platform was not delivered as described and you have first contacted us to resolve the issue. Unauthorized chargebacks may result in permanent account termination and collection action for the full disputed amount plus fees.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>4. Service Delivery</p>
+          <p style={{ marginBottom:20 }}>Access to the APEX platform is granted immediately upon successful payment confirmation. You will receive onboarding instructions and login credentials via the email address provided at checkout within 24 hours of purchase. If you do not receive access within 24 hours, you must contact us directly at the support channels provided before initiating any dispute or chargeback.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>5. Cancellation Policy</p>
+          <p style={{ marginBottom:20 }}>You may cancel your subscription at any time from your account dashboard. Cancellation takes effect at the end of your current billing period — you will retain full access until that date. No partial refunds are issued for unused time remaining in a billing period. It is your responsibility to cancel before the next renewal date to avoid being charged for the following period.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>6. Compliance with Real Estate Laws</p>
+          <p style={{ marginBottom:20 }}>Real estate wholesaling laws, licensing requirements, and regulations vary significantly by state and jurisdiction. You are solely responsible for ensuring your wholesaling business practices comply with all applicable local, state, and federal laws. APEX provides software tools only and does not provide legal, financial, or real estate advice. Nothing in this platform should be construed as legal guidance. Consult a licensed attorney in your state before conducting wholesale transactions.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>7. Prohibited Use</p>
+          <p style={{ marginBottom:20 }}>You agree to use the APEX platform only for lawful purposes. You may not use the platform to engage in spam, harassment, fraudulent transactions, or any activity that violates applicable law. We reserve the right to terminate your account without refund if we determine you are using the platform in violation of these terms or in a manner that harms other users or third parties.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>8. Limitation of Liability</p>
+          <p style={{ marginBottom:20 }}>APEX is a software platform and toolset. We do not guarantee specific financial results, deal closings, assignment fees, or income. All business outcomes depend entirely on your own effort, market conditions, and compliance with applicable law. Our total liability to you for any claim arising from your use of the platform is limited to the total amount you paid for your current subscription period.</p>
+
+          <p style={{ color:C.white,fontWeight:700,fontSize:15,marginBottom:6 }}>9. Modifications to Terms</p>
+          <p style={{ marginBottom:0 }}>We reserve the right to update these Terms of Service at any time. Continued use of the platform following any changes constitutes your acceptance of the revised terms. We will make reasonable efforts to notify subscribers of material changes via email or in-platform notification.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ fontFamily:font,color:C.text,background:C.bg,minHeight:"100vh" }}>
+
+      {showTerms && <TermsModal />}
+
+      {/* NAV */}
+      <nav style={{ position:"fixed",top:0,left:0,right:0,zIndex:1000,padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(5,2,8,.85)",backdropFilter:"blur(20px)",borderBottom:`1px solid ${C.border}` }}>
+        <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+          <svg viewBox="0 0 36 36" fill="none" style={{width:32,height:32}}><rect x="2" y="2" width="32" height="32" rx="7" stroke={C.accent} strokeWidth="2" fill="none"/><path d="M10 26V13l8-4 8 4v13l-8 4-8-4z" fill={C.accent} opacity=".25"/><path d="M18 9v20M10 13l8 4 8-4" stroke={C.accent} strokeWidth="1.2"/></svg>
+          <span style={{ fontFamily:"'Manrope',sans-serif",fontSize:18,fontWeight:800,color:C.white }}>REAL DEAL <span style={{ color:C.accent }}>APEX</span></span>
+        </div>
+        <div className="nav-links" style={{ display:"flex",gap:28,alignItems:"center" }}>
+          {["Features","Pricing","FAQ"].map(l => (
+            <a key={l} href={`#${l.toLowerCase()}`} style={{ color:C.muted,textDecoration:"none",fontSize:14,fontWeight:500 }}>{l}</a>
+          ))}
+          <CTA onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}>Get Access</CTA>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section style={{ minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center",padding:"140px 24px 80px",position:"relative",overflow:"hidden" }}>
+        <div style={{ position:"absolute",inset:0,backgroundImage:`radial-gradient(circle at 50% 40%, rgba(124,58,237,.08) 0%, transparent 60%)`,pointerEvents:"none" }} />
+        <div style={{ position:"absolute",inset:0,backgroundImage:`linear-gradient(${C.border}40 1px, transparent 1px), linear-gradient(90deg, ${C.border}40 1px, transparent 1px)`,backgroundSize:"80px 80px",opacity:0.08,pointerEvents:"none" }} />
+        <div style={{ position:"relative",zIndex:1,maxWidth:850 }}>
+          <div style={{ display:"inline-flex",alignItems:"center",gap:8,padding:"8px 20px",borderRadius:100,border:`1px solid ${C.border}`,background:`${C.purple}10`,fontSize:13,fontWeight:600,color:C.purpleLight,marginBottom:32 }}>
+            ⚡ The all-in-one platform built for real estate wholesalers
+          </div>
+          <h1 className="hero-title" style={{ fontFamily:"'Manrope',sans-serif",fontSize:"clamp(40px,6.5vw,76px)",fontWeight:800,lineHeight:1.05,color:C.white,marginBottom:28,letterSpacing:"-0.03em" }}>
+            The Ultimate<br />Wholesaling<br /><RotatingText /><br />Software
+          </h1>
+          <p style={{ fontSize:"clamp(16px,2vw,20px)",color:C.muted,maxWidth:600,margin:"0 auto 44px",lineHeight:1.65 }}>
+            Built-in CRM, Phone System, E-Signing, Automated Follow-Ups & More — all inside one platform built for real estate wholesalers.
+          </p>
+          <div style={{ display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap" }}>
+            <CTA large onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}>Get Access — $29/mo →</CTA>
+            <CTA large outline onClick={() => document.getElementById("features")?.scrollIntoView({ behavior:"smooth" })}>See Features</CTA>
+          </div>
+          <p style={{ fontSize:13,color:C.dim,marginTop:20 }}>Cancel anytime · Instant access · No hidden fees</p>
+        </div>
+      </section>
+
+      {/* TICKER */}
+      <div className="ticker-wrap" style={{ borderTop:`1px solid ${C.border}`,borderBottom:`1px solid ${C.border}`,background:C.card,padding:"14px 0",overflow:"hidden" }}>
+        <div className="ticker-track">
+          {[...Array(2)].map((_, rep) => (
+            <div key={rep} style={{ display:"flex",alignItems:"center",gap:40,paddingRight:40 }}>
+              {["Built-in Phone Dialer","Full CRM Pipeline","E-Signing Built In","Automated Follow-Ups","Call Recording & Logging","Voicemail Drops","Smart Lists","Lawyer-Approved Contracts","Deal Stage Tracking","50+ States","One Platform. Zero Excuses."].map((t, i) => (
+                <div key={`${rep}-${i}`} style={{ display:"flex",alignItems:"center",gap:8,whiteSpace:"nowrap" }}>
+                  <div className="sparkle" style={{ width:6,height:6,borderRadius:"50%",background:C.purple,flexShrink:0 }} />
+                  <span style={{ fontSize:13,fontWeight:600,color:C.muted }}>{t}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* STATS */}
+      <div style={{ padding:"40px 24px",background:C.bg }}>
+        <div style={{ maxWidth:900,margin:"0 auto",display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap" }}>
+          {[
+            { n:"9+", l:"Tools in One Platform", icon:"⚡", color:C.purple },
+            { n:"$29", l:"Per Month, All-In", icon:"💰", color:C.green },
+            { n:"50+", l:"States Covered", icon:"📍", color:C.blue },
+            { n:"24/7", l:"Follow-Up Automation", icon:"🔁", color:C.orange },
+            { n:"<2 min", l:"To Send a Contract", icon:"✍️", color:C.accent },
+          ].map(({ n, l, icon, color }) => (
+            <div key={l} style={{ flex:"1 1 160px",textAlign:"center",padding:"24px 16px",background:C.card,borderRadius:16,border:`1px solid ${C.border}` }}>
+              <div style={{ fontSize:24,marginBottom:8 }}>{icon}</div>
+              <div style={{ fontFamily:"'Manrope',sans-serif",fontSize:n.length > 5 ? 18 : 28,fontWeight:800,color:color }}>{n}</div>
+              <div style={{ fontSize:12,color:C.muted,marginTop:4 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CORE FEATURES 3-GRID */}
+      <Section>
+        <div style={{ textAlign:"center",marginBottom:60 }}>
+          <SectionLabel>🔥 Built for the Way You Work</SectionLabel>
+          <SectionTitle>Every Tool a Wholesaler Needs.<br />Nothing Extra.</SectionTitle>
+          <p style={{ fontSize:17,color:C.muted,maxWidth:600,margin:"0 auto",lineHeight:1.6 }}>Stop duct-taping together separate apps that don't talk to each other. APEX is one platform where your CRM, phone system, contracts, and automations all live together — and actually sync.</p>
+        </div>
+        <div className="grid-3" style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:24 }}>
+          {[
+            { icon:"📊", title:"Visual Deal Pipeline", desc:"Drag-and-drop deal stages so you always know exactly where every lead is — from first contact to closed deal. No more losing deals in a spreadsheet.", color:C.purple },
+            { icon:"📞", title:"Built-In Phone & Dialer", desc:"Call directly from your dashboard. Every call is automatically logged and recorded, tied to the right contact so nothing falls through the cracks.", color:C.red },
+            { icon:"🔁", title:"Automated Follow-Ups", desc:"Build drip sequences that follow up with your leads via SMS and email on autopilot — so you never drop the ball on a motivated seller.", color:C.green },
+          ].map((f, i) => (
+            <div key={i} className="feature-card" style={{ background:C.card,borderRadius:20,padding:"36px 28px",position:"relative",overflow:"hidden" }}>
+              <div style={{ position:"absolute",top:0,right:0,width:120,height:120,background:`radial-gradient(circle, ${f.color}10, transparent)`,pointerEvents:"none" }} />
+              <div style={{ fontSize:36,marginBottom:16 }}>{f.icon}</div>
+              <h3 style={{ fontSize:20,fontWeight:800,color:C.white,marginBottom:10,fontFamily:"'Manrope',sans-serif" }}>{f.title}</h3>
+              <p style={{ fontSize:14,color:C.muted,lineHeight:1.7 }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* COST COMPARISON TABLE */}
+      <Section id="compare" dark>
+        <div style={{ textAlign:"center",marginBottom:48 }}>
+          <SectionLabel color={C.red}>💸 Stop Overpaying</SectionLabel>
+          <SectionTitle>Other Software Costs vs APEX</SectionTitle>
+          <p style={{ fontSize:17,color:C.muted,maxWidth:550,margin:"0 auto",lineHeight:1.6 }}>Most wholesalers pay $500+/mo for tools that don't even talk to each other. We put everything in one platform.</p>
+        </div>
+        <div className="cost-table" style={{ maxWidth:800,margin:"0 auto",background:C.card,borderRadius:20,border:`1px solid ${C.border}`,overflow:"hidden" }}>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 150px 150px",padding:"18px 24px",borderBottom:`2px solid ${C.border}`,fontSize:13,fontWeight:800,color:C.dim,textTransform:"uppercase",letterSpacing:".06em" }}>
+            <span>Feature</span>
+            <span style={{ textAlign:"center" }}>Other Software</span>
+            <span style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:4,color:C.purpleLight }}>
+              <svg viewBox="0 0 20 20" fill="none" style={{ width:14,height:14 }}><rect x="2" y="2" width="16" height="16" rx="3" stroke={C.accent} strokeWidth="1.5" fill="none"/><path d="M6 14V8l4-2 4 2v6l-4 2-4-2z" fill={C.accent} opacity=".3"/></svg>
+              APEX
+            </span>
+          </div>
+          {costRows.map((r, i) => (
+            <div key={i} className="cost-row" style={{ display:"grid",gridTemplateColumns:"1fr 150px 150px",padding:"14px 24px",borderBottom:i < costRows.length-1 ? `1px solid ${C.border}` : "none",alignItems:"center" }}>
+              <span style={{ fontSize:14,color:C.text,display:"flex",alignItems:"center",gap:10 }}>
+                <span style={{ width:32,height:32,borderRadius:8,background:`${C.purple}10`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0 }}>{r.icon}</span>
+                {r.feature}
+              </span>
+              <span style={{ display:"flex",alignItems:"center",justifyContent:"center",height:32 }}>
+                <span style={{ padding:"4px 12px",borderRadius:6,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.15)",fontSize:13,fontWeight:700,color:C.red }}>{r.them}</span>
+              </span>
+              <span style={{ display:"flex",alignItems:"center",justifyContent:"center",height:32 }}>
+                <span style={{ display:"flex",alignItems:"center",gap:6,padding:"4px 12px",borderRadius:6,background:"rgba(34,197,94,.08)",border:"1px solid rgba(34,197,94,.15)",fontSize:13,fontWeight:700,color:C.green }}>
+                  <Check color={C.green} /> Included
+                </span>
+              </span>
+            </div>
+          ))}
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 150px 150px",padding:"20px 24px",background:`${C.purple}10`,borderTop:`2px solid ${C.purple}30`,alignItems:"center" }}>
+            <span style={{ fontSize:16,fontWeight:800,color:C.white }}>TOTAL</span>
+            <span style={{ display:"flex",alignItems:"center",justifyContent:"center" }}>
+              <span style={{ fontSize:18,fontWeight:800,color:C.red,textDecoration:"line-through" }}>{totalThem}</span>
+            </span>
+            <span style={{ display:"flex",alignItems:"center",justifyContent:"center" }}>
+              <span style={{ fontSize:18,fontWeight:900,color:C.green,background:"rgba(34,197,94,.1)",padding:"4px 16px",borderRadius:8,border:"1px solid rgba(34,197,94,.2)" }}>$29/mo</span>
+            </span>
+          </div>
+          <div style={{ padding:"16px 24px",background:`linear-gradient(90deg, ${C.purple}15, ${C.green}10)`,display:"flex",alignItems:"center",justifyContent:"center",gap:8 }}>
+            <span style={{ fontSize:20 }}>🔥</span>
+            <span style={{ fontSize:14,fontWeight:700,color:C.white }}>You save over <span style={{ color:C.green }}>$590/mo</span> by switching to APEX</span>
+          </div>
+        </div>
+      </Section>
+
+      {/* FEATURE TABS — no emoji preview panel */}
+      <Section id="features">
+        <div style={{ textAlign:"center",marginBottom:48 }}>
+          <SectionLabel>🚀 All-In-One Platform</SectionLabel>
+          <SectionTitle>Everything You Need. Nothing You Don't.</SectionTitle>
+        </div>
+        <div style={{ display:"flex",justifyContent:"center",gap:8,marginBottom:40,flexWrap:"wrap" }}>
+          {featureTabs.map((t, i) => (
+            <button key={i} className="tab-btn" onClick={() => setActiveTab(i)} style={{
+              padding:"12px 24px",borderRadius:12,border:`1px solid ${activeTab===i ? C.purple : C.border}`,
+              background:activeTab===i ? `${C.purple}15` : "transparent",
+              color:activeTab===i ? C.white : C.muted,
+              fontSize:14,fontWeight:700,fontFamily:font,cursor:"pointer",
+              display:"flex",alignItems:"center",gap:8,
+            }}>
+              <span style={{ fontSize:18 }}>{t.icon}</span>{t.label}
+            </button>
+          ))}
+        </div>
+        {/* Single column — no emoji panel */}
+        <div key={activeTab} className="fade-up" style={{ maxWidth:680,margin:"0 auto" }}>
+          <div style={{ background:C.card,borderRadius:20,border:`1px solid ${C.border}`,padding:"48px 40px" }}>
+            <div style={{ fontSize:40,marginBottom:20 }}>{featureTabs[activeTab].icon}</div>
+            <h3 style={{ fontFamily:"'Manrope',sans-serif",fontSize:30,fontWeight:800,color:C.white,marginBottom:14 }}>{featureTabs[activeTab].title}</h3>
+            <p style={{ fontSize:15,color:C.muted,lineHeight:1.7,marginBottom:28 }}>{featureTabs[activeTab].desc}</p>
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px 24px",marginBottom:36 }}>
+              {featureTabs[activeTab].features.map((f, i) => (
+                <div key={i} style={{ display:"flex",alignItems:"center",gap:10,fontSize:14,color:C.text }}>
+                  <Check color={C.purple} />{f}
+                </div>
+              ))}
+            </div>
+            <CTA onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}>Get Access →</CTA>
+          </div>
+        </div>
+      </Section>
+
+      {/* VALUE STACK */}
+      <Section dark>
+        <div style={{ textAlign:"center",marginBottom:48 }}>
+          <SectionLabel color={C.accent}>💰 The Value Stack</SectionLabel>
+          <SectionTitle>Here's What You're Getting</SectionTitle>
+          <p style={{ fontSize:17,color:C.muted,maxWidth:500,margin:"0 auto" }}>If you bought each of these separately, you'd pay over {totalValue}/year.</p>
+        </div>
+        <div style={{ maxWidth:650,margin:"0 auto",background:C.card,borderRadius:20,border:`1px solid ${C.border}`,overflow:"hidden" }}>
+          <div style={{ padding:"20px 24px",borderBottom:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",fontSize:12,fontWeight:700,color:C.dim,textTransform:"uppercase",letterSpacing:".06em" }}>
+            <span>What You Get</span><span>Standalone Cost</span>
+          </div>
+          {valueStack.map((v, i) => (
+            <div key={i} className="cost-row" style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 24px",borderBottom:i < valueStack.length-1 ? `1px solid ${C.border}` : "none" }}>
+              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                <div style={{ width:36,height:36,borderRadius:10,background:`${C.purple}10`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>{v.icon}</div>
+                <div>
+                  <span style={{ fontSize:14,fontWeight:600,color:C.white }}>{v.item}</span>
+                  <div style={{ display:"flex",alignItems:"center",gap:4,marginTop:2 }}>
+                    <Check color={C.green} />
+                    <span style={{ fontSize:11,color:C.green,fontWeight:600 }}>Included</span>
+                  </div>
+                </div>
+              </div>
+              <span style={{ fontSize:14,fontWeight:700,color:C.red,textDecoration:"line-through",padding:"4px 12px",borderRadius:6,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.1)" }}>{v.value}</span>
+            </div>
+          ))}
+          <div style={{ padding:"24px",background:`linear-gradient(90deg, ${C.purple}12, ${C.green}08)`,display:"flex",alignItems:"center",justifyContent:"space-between" }}>
+            <div>
+              <div style={{ fontSize:18,fontWeight:800,color:C.white }}>Total Value</div>
+              <div style={{ fontSize:12,color:C.muted,marginTop:2 }}>Everything. One subscription.</div>
+            </div>
+            <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+              <span style={{ fontSize:22,fontWeight:900,color:C.red,textDecoration:"line-through",opacity:0.7 }}>{totalValue}</span>
+              <span style={{ fontSize:26,fontWeight:900,color:C.green,background:"rgba(34,197,94,.1)",padding:"6px 18px",borderRadius:10,border:"1px solid rgba(34,197,94,.2)" }}>$29/mo</span>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* TESTIMONIALS */}
+      <Section>
+        <div style={{ textAlign:"center",marginBottom:48 }}>
+          <SectionLabel>⭐ Results</SectionLabel>
+          <SectionTitle>What Our Members Are Saying</SectionTitle>
+        </div>
+        <div className="grid-2" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:20 }}>
+          {testimonials.map((t, i) => (
+            <div key={i} className="testimonial-card" style={{ background:C.card,borderRadius:20,padding:"32px 28px",position:"relative",overflow:"hidden" }}>
+              <div style={{ position:"absolute",top:16,right:20,fontSize:48,color:C.purple,opacity:0.08,fontFamily:"Georgia,serif",lineHeight:1 }}>"</div>
+              <div style={{ display:"flex",gap:3,marginBottom:16 }}>{[0,1,2,3,4].map(j => <svg key={j} width="16" height="16" viewBox="0 0 16 16" fill={C.accent}><path d="M8 1l2 4.3 4.7.7-3.4 3.3.8 4.7L8 11.8 3.9 14l.8-4.7L1.3 6l4.7-.7z"/></svg>)}</div>
+              <p style={{ fontSize:15,color:C.text,lineHeight:1.7,marginBottom:24,fontStyle:"italic" }}>"{t.q}"</p>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                  <div style={{ width:40,height:40,borderRadius:"50%",background:`linear-gradient(135deg, ${C.purple}, ${C.blue})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:800,color:C.white,flexShrink:0 }}>{t.name.charAt(0)}</div>
+                  <div>
+                    <div style={{ fontSize:14,fontWeight:700,color:C.white }}>{t.name}</div>
+                    <div style={{ fontSize:12,color:C.muted }}>{t.role}</div>
+                  </div>
+                </div>
+                {/* Consistent green badge format: $X closed in X days */}
+                <div style={{ padding:"6px 14px",borderRadius:10,background:`${C.green}12`,border:`1px solid ${C.green}25`,fontSize:12,fontWeight:700,color:C.green }}>{t.result}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* PRICING */}
+      <Section id="pricing" dark>
+        <div style={{ textAlign:"center",marginBottom:16 }}>
+          <SectionLabel color={C.green}>💎 One Plan. Everything Included.</SectionLabel>
+          <SectionTitle>Invest in Your Pipeline</SectionTitle>
+          <p style={{ fontSize:17,color:C.muted,maxWidth:500,margin:"0 auto 32px" }}>No tiers. No upsells. No features locked behind paywalls. You get everything for one price.</p>
+          <div style={{ display:"inline-flex",alignItems:"center",background:C.card,borderRadius:12,border:`1px solid ${C.border}`,padding:4,marginBottom:48 }}>
+            {["monthly","annual"].map(b => (
+              <button key={b} onClick={() => setBilling(b)} style={{
+                padding:"10px 24px",borderRadius:10,border:"none",
+                background:billing===b ? C.purple : "transparent",
+                color:billing===b ? C.white : C.muted,
+                fontSize:14,fontWeight:700,fontFamily:font,cursor:"pointer",position:"relative",
+              }}>
+                {b==="monthly" ? "Monthly" : "Annual"}
+                {b==="annual" && <span style={{ position:"absolute",top:-10,right:-10,background:C.green,color:"#050208",fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:100 }}>SAVE $58</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ maxWidth:520,margin:"0 auto" }}>
+          <div className="pricing-card glow-card" style={{ background:C.card,borderRadius:24,padding:"48px 36px",border:`2px solid ${C.purple}`,position:"relative",boxShadow:`0 0 80px ${C.purple}12` }}>
+            <div style={{ position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:C.purple,color:C.white,fontSize:11,fontWeight:800,padding:"6px 20px",borderRadius:100,textTransform:"uppercase",letterSpacing:".08em",whiteSpace:"nowrap" }}>Everything Included</div>
+            <div style={{ textAlign:"center",marginBottom:28 }}>
+              <div style={{ fontSize:16,fontWeight:700,color:C.purpleLight,marginBottom:8 }}>{plan.name}</div>
+              <div style={{ display:"flex",alignItems:"baseline",justifyContent:"center",gap:6 }}>
+                <span style={{ fontFamily:"'Manrope',sans-serif",fontSize:64,fontWeight:900,color:C.white,lineHeight:1 }}>
+                  {billing==="monthly" ? plan.priceMonthly : plan.priceAnnual}
+                </span>
+                <span style={{ fontSize:18,color:C.muted,fontWeight:500 }}>
+                  {billing==="monthly" ? plan.perMonthly : plan.perAnnual}
+                </span>
+              </div>
+              {billing==="annual" && <div style={{ fontSize:13,color:C.green,marginTop:6,fontWeight:600 }}>That's just $24.17/mo — save $58 vs monthly</div>}
+              {billing==="monthly" && <div style={{ fontSize:13,color:C.muted,marginTop:6 }}>Less than $1/day for everything</div>}
+              <p style={{ fontSize:14,color:C.muted,marginTop:12 }}>{plan.desc}</p>
+            </div>
+            <hr style={{ border:"none",borderTop:`1px solid ${C.border}`,margin:"0 0 28px" }} />
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px 20px",marginBottom:32 }}>
+              {plan.features.map((f, j) => (
+                <div key={j} style={{ display:"flex",alignItems:"center",gap:8,fontSize:13,color:C.text }}>
+                  <Check color={C.green} />{f}
+                </div>
+              ))}
+            </div>
+
+            <CTA large style={{ width:"100%" }} onClick={handlePurchase}>
+              Get Instant Access →
+            </CTA>
+
+            {/* Terms below button — no checkbox */}
+            <p style={{ textAlign:"center",fontSize:12,color:C.dim,marginTop:14,lineHeight:1.6 }}>
+              By continuing you agree to our{" "}
+              <span className="terms-link" onClick={() => setShowTerms(true)}>Terms of Service & Refund Policy</span>.
+              Cancel anytime · All sales are final.
+            </p>
+          </div>
+
+          <div style={{ textAlign:"center",marginTop:32,padding:"20px 24px",background:`${C.purple}08`,borderRadius:16,border:`1px solid ${C.purple}20` }}>
+            <div style={{ fontSize:14,color:C.muted,marginBottom:6 }}>Competitors charge <span style={{ color:C.red,fontWeight:800,textDecoration:"line-through" }}>$628/mo</span> for the same tools.</div>
+            <div style={{ fontSize:18,fontWeight:800,color:C.white }}>You get everything for <span style={{ color:C.green,fontSize:22 }}>{billing==="monthly" ? "$29/mo" : "$290/yr"}</span></div>
+          </div>
+
+          <div style={{ display:"flex",justifyContent:"center",gap:24,marginTop:28,flexWrap:"wrap" }}>
+            {[{ icon:"🔒",text:"Secure Payment via Stripe" },{ icon:"↩️",text:"Cancel Anytime" },{ icon:"⚡",text:"Instant Access" }].map(({ icon, text }) => (
+              <div key={text} style={{ display:"flex",alignItems:"center",gap:6,fontSize:13,color:C.muted }}>
+                <span style={{ fontSize:16 }}>{icon}</span>{text}
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* FAQ */}
+      <Section id="faq">
+        <div style={{ textAlign:"center",marginBottom:48 }}>
+          <SectionLabel>❓ FAQ</SectionLabel>
+          <SectionTitle>Questions? We Got Answers.</SectionTitle>
+        </div>
+        <div style={{ maxWidth:700,margin:"0 auto" }}>
+          {faqs.map((f, i) => (
+            <div key={i} style={{ marginBottom:8,borderRadius:14,border:`1px solid ${openFaq===i ? C.purple : C.border}`,overflow:"hidden",transition:"all .3s",background:C.card }}>
+              <button className="faq-btn" onClick={() => setOpenFaq(openFaq===i ? null : i)} style={{ width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"20px 24px",background:"none",border:"none",fontSize:15,fontWeight:700,color:C.white,fontFamily:font,cursor:"pointer",textAlign:"left" }}>
+                {f.q}
+                <span style={{ transform:openFaq===i ? "rotate(180deg)" : "none",transition:".3s",color:C.muted,fontSize:18,flexShrink:0,marginLeft:12 }}>▾</span>
+              </button>
+              <div style={{ maxHeight:openFaq===i ? 400 : 0,overflow:"hidden",transition:"all .3s ease",padding:openFaq===i ? "0 24px 20px" : "0 24px" }}>
+                <p style={{ fontSize:14,color:C.muted,lineHeight:1.7 }}>{f.a}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* FINAL CTA */}
+      <section style={{ padding:"100px 24px",textAlign:"center",position:"relative" }}>
+        <div style={{ position:"absolute",inset:0,background:`radial-gradient(circle at 50% 50%, ${C.purple}10, transparent 60%)`,pointerEvents:"none" }} />
+        <div style={{ position:"relative",zIndex:1 }}>
+          <SectionTitle>Ready to Start Closing Deals?</SectionTitle>
+          <p style={{ fontSize:17,color:C.muted,maxWidth:500,margin:"0 auto 40px",lineHeight:1.6 }}>Join the wholesalers who manage their pipeline, track their calls, and close deals — all from one dashboard.</p>
+          <CTA large onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}>Get Access — $29/mo →</CTA>
+          <p style={{ fontSize:13,color:C.dim,marginTop:16 }}>Cancel anytime · No hidden fees</p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ borderTop:`1px solid ${C.border}`,padding:"48px 24px",maxWidth:1200,margin:"0 auto" }}>
+        <div className="grid-4" style={{ display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:40,marginBottom:40 }}>
+          <div>
+            <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:16 }}>
+              <svg viewBox="0 0 28 28" fill="none" style={{width:24,height:24}}><rect x="2" y="2" width="24" height="24" rx="5" stroke={C.accent} strokeWidth="1.5" fill="none"/><path d="M7 20V10l7-3.5 7 3.5v10l-7 3.5L7 20z" fill={C.accent} opacity=".25"/></svg>
+              <span style={{ fontFamily:"'Manrope',sans-serif",fontSize:15,fontWeight:800,color:C.white }}>REAL DEAL <span style={{ color:C.accent }}>APEX</span></span>
+            </div>
+            <p style={{ fontSize:13,color:C.dim,lineHeight:1.6,maxWidth:280 }}>The all-in-one CRM and deal management platform for real estate wholesalers. Track leads, manage your pipeline, and close more deals.</p>
+          </div>
+          <div>
+            <div style={{ fontSize:13,fontWeight:700,color:C.white,marginBottom:16,textTransform:"uppercase",letterSpacing:".06em" }}>Product</div>
+            {["Features","Pricing","CRM","Phone System"].map(l => (
+              <div key={l} style={{ fontSize:13,color:C.muted,marginBottom:10 }}>{l}</div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize:13,fontWeight:700,color:C.white,marginBottom:16,textTransform:"uppercase",letterSpacing:".06em" }}>Resources</div>
+            <a href="https://discord.gg/XRG7J75vKk" target="_blank" rel="noreferrer" style={{ display:"block",fontSize:13,color:C.purpleLight,marginBottom:10,textDecoration:"none" }}>Discord Community</a>
+            {["Help Center","Blog"].map(l => (
+              <div key={l} style={{ fontSize:13,color:C.muted,marginBottom:10 }}>{l}</div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize:13,fontWeight:700,color:C.white,marginBottom:16,textTransform:"uppercase",letterSpacing:".06em" }}>Legal</div>
+            <div style={{ fontSize:13,color:C.muted,marginBottom:10 }}>Privacy Policy</div>
+            <span onClick={() => setShowTerms(true)} style={{ display:"block",fontSize:13,color:C.purpleLight,marginBottom:10,cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2 }}>Terms of Service</span>
+            <span onClick={() => setShowTerms(true)} style={{ display:"block",fontSize:13,color:C.purpleLight,marginBottom:10,cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2 }}>Refund Policy</span>
+          </div>
+        </div>
+        <div style={{ borderTop:`1px solid ${C.border}`,paddingTop:24,textAlign:"center",fontSize:12,color:C.dim }}>
+          © 2026 Real Deal Wholesale by APEX. All rights reserved. · All sales are final · No refunds
+        </div>
+      </footer>
+
+
+      {/* STICKY CTA BAR */}
+      {showSticky && (
+        <div className="sticky-bar" style={{ position:"fixed",bottom:0,left:0,right:0,zIndex:999,background:"rgba(5,2,8,.92)",backdropFilter:"blur(20px)",borderTop:`1px solid ${C.border}`,padding:"12px 24px" }}>
+          <div style={{ maxWidth:1000,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16 }}>
+            <div>
+              <div style={{ fontSize:14,fontWeight:700,color:C.white }}>Get everything for just <span style={{ color:C.green }}>$29/mo</span></div>
+              <div style={{ fontSize:12,color:C.muted }}>CRM · Phone System · E-Sign · Automated Follow-Ups · Voicemail Drops</div>
+            </div>
+            <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:6 }}>
+                <div style={{ width:7,height:7,borderRadius:"50%",background:C.green,animation:"pulse 2s infinite" }} />
+                <span style={{ fontSize:12,color:C.green,fontWeight:600 }}>Spots available now</span>
+              </div>
+              <CTA onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior:"smooth" })}>Get Access →</CTA>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SCROLL TO TOP */}
+      {showSticky && (
+        <button onClick={() => window.scrollTo({ top:0,behavior:"smooth" })} style={{ position:"fixed",bottom:80,right:24,zIndex:998,width:44,height:44,borderRadius:12,background:C.card,border:`1px solid ${C.border}`,color:C.muted,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,0,0,.3)" }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
