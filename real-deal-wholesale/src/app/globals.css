@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Montserrat', sans-serif;
+  --font-body: 'Lato', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #071629; }
+::-webkit-scrollbar-thumb { background: #244d85; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #E07820; }
+
+/* Grain overlay */
+.grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.35;
+}
+
+/* Orange glow */
+.glow-orange {
+  box-shadow: 0 0 50px rgba(224, 120, 32, 0.18);
+}
+
+/* Shimmer loading */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #071629 25%,
+    #0c2040 50%,
+    #071629 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* Status badges */
+.status-queued   { @apply bg-dark-600 text-gray-400; }
+.status-scraping { @apply bg-blue-900/40 text-blue-400; }
+.status-tracing  { @apply bg-purple-900/40 text-purple-400; }
+.status-complete { @apply bg-green-900/40 text-green-400; }
+.status-failed   { @apply bg-red-900/40 text-red-400; }
+
+/* Montserrat display — force bold weight */
+.font-display {
+  font-weight: 700;
+}
