@@ -8,54 +8,63 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['var(--font-display)', 'sans-serif'],
-        body: ['var(--font-body)', 'sans-serif'],
+        display: ['var(--font-display)', 'Montserrat', 'sans-serif'],
+        body:    ['var(--font-body)',    'Lato',       'sans-serif'],
       },
       colors: {
-        // Brand orange — warm amber-orange from the logo swoosh
+        // Primary accent — brand gold from brand board
         brand: {
-          50:  '#fef5ec',
-          100: '#fde6cc',
-          200: '#fbc99a',
-          300: '#f8a660',
-          400: '#f48b2e',
-          500: '#E07820', // primary brand orange
-          600: '#c4620f',
-          700: '#a35010',
-          800: '#854110',
-          900: '#6d360f',
+          50:  '#fdf8ec',
+          100: '#faefc8',
+          200: '#f5df93',
+          300: '#f0cc5e',
+          400: '#f5cc7f',   // gold light
+          500: '#EBAF4E',   // ← THE accent color
+          600: '#c49035',   // gold dim
+          700: '#9e7220',
+          800: '#7d591a',
+          900: '#624615',
         },
-        // Deep navy dark scale — based on #0A2F4F brand navy
+        // Deep navy dark scale — matches index.html exactly
         dark: {
-          900: '#040d1a', // page background
-          800: '#071629', // card backgrounds
-          700: '#0c2040', // elevated surfaces / section bg
-          600: '#112b55', // borders, dividers
-          500: '#1a3a6b', // hover states
-          400: '#244d85', // subtle highlights
+          900: '#06111C',   // main page background
+          800: '#0c1e2d',   // card backgrounds
+          700: '#0d2035',   // elevated surfaces
+          600: '#152435',   // borders / dividers
+          500: '#1e3448',   // border mid
+          400: '#2a4460',   // border light / hover
         },
-        // Brand navy (use directly as bg color e.g. bg-navy)
-        navy: '#0A2F4F',
-        // Steel blue-gray from brand board
-        steel: '#5C6B73',
-        // Gold / amber accent
-        gold: '#EBAF4E',
-        // Sandy taupe
-        taupe: '#D4B29D',
+        navy:  '#0A2F4F',   // brand navy accent bg
+        steel: '#5C6B73',   // brand slate
+        gold:  '#EBAF4E',   // alias for convenience
+        taupe: '#D4B29D',   // brand cream
+        rdw: {
+          text:  '#c5d3de',
+          muted: '#6a8090',
+          dim:   '#3a5060',
+          white: '#F0F4F8',
+          green: '#3ecf8e',
+          red:   '#e05252',
+        },
       },
       animation: {
-        'fade-up':    'fadeUp 0.5s ease forwards',
+        'fade-up':    'fadeInUp .6s ease both',
         'pulse-slow': 'pulse 3s ease-in-out infinite',
-        'shimmer':    'shimmer 2s linear infinite',
+        'shimmer':    'shimmer 6s linear infinite',
+        'glow-gold':  'glowGold 3s ease-in-out infinite',
       },
       keyframes: {
-        fadeUp: {
-          '0%':   { opacity: '0', transform: 'translateY(16px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        fadeInUp: {
+          from: { opacity: '0', transform: 'translateY(30px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
         shimmer: {
-          '0%':   { backgroundPosition: '-1000px 0' },
-          '100%': { backgroundPosition: '1000px 0' },
+          '0%':   { backgroundPosition: '-300% 0' },
+          '100%': { backgroundPosition:  '300% 0' },
+        },
+        glowGold: {
+          '0%,100%': { boxShadow: '0 0 20px rgba(235,175,78,.12)' },
+          '50%':     { boxShadow: '0 0 40px rgba(235,175,78,.28)' },
         },
       },
     },

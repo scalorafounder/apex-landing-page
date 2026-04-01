@@ -3,192 +3,268 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
+// ─── Color tokens (exact match to brand system) ───────────────────────────────
+const C = {
+  bg:      '#06111C',
+  bgDeep:  '#040e16',
+  card:    '#0c1e2d',
+  border:  '#152435',
+  borderM: '#1e3448',
+  navy:    '#0A2F4F',
+  gold:    '#EBAF4E',
+  goldL:   '#f5cc7f',
+  white:   '#F0F4F8',
+  text:    '#c5d3de',
+  muted:   '#6a8090',
+  dim:     '#3a5060',
+  green:   '#3ecf8e',
+}
+
+// ─── Shared components ────────────────────────────────────────────────────────
 function BrandLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-  const sizes = {
-    sm: { main: 'text-xl',  sub: 'text-[9px] tracking-[0.28em]' },
-    md: { main: 'text-2xl', sub: 'text-[10px] tracking-[0.3em]' },
-    lg: { main: 'text-4xl', sub: 'text-xs tracking-[0.3em]' },
-  }
-  const s = sizes[size]
+  const sz = { sm: 22, md: 28, lg: 36 }[size]
+  const fs = { sm: 14, md: 17, lg: 22 }[size]
   return (
-    <div className="font-display leading-none">
-      <div className={`${s.main} font-black`}>
-        <span className="text-brand-500">REAL</span>
-        <span className="text-white">DEAL</span>
-      </div>
-      <div className={`${s.sub} text-steel font-body font-normal mt-0.5`}>
-        — WHOLESALE BY APEX —
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <svg viewBox="0 0 36 36" fill="none" width={sz} height={sz}>
+        <path d="M18 4L4 16h4v14h8v-8h4v8h8V16h4L18 4z" fill={C.navy} stroke={C.gold} strokeWidth="1.2"/>
+        <rect x="14" y="20" width="8" height="10" fill={C.gold} opacity=".3"/>
+      </svg>
+      <div>
+        <div style={{ fontFamily:'Montserrat,sans-serif', fontSize: fs, fontWeight: 800, color: C.white, letterSpacing: '.02em', lineHeight: 1 }}>
+          REAL DEAL <span style={{ color: C.gold }}>WHOLESALE</span>
+        </div>
+        <div style={{ fontFamily:'Lato,sans-serif', fontSize: 9, fontWeight: 600, color: C.muted, letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 2 }}>
+          BY APEX
+        </div>
       </div>
     </div>
   )
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 8,
+      padding: '5px 16px', borderRadius: 4,
+      border: `1px solid ${C.gold}35`,
+      background: `${C.gold}0d`,
+      fontSize: 11, fontWeight: 700, color: C.gold,
+      letterSpacing: '.1em', textTransform: 'uppercase' as const,
+      marginBottom: 16, fontFamily: 'Montserrat,sans-serif',
+    }}>{children}</div>
+  )
+}
+
+function GoldLine() {
+  return <div style={{ width: 48, height: 3, background: `linear-gradient(90deg,${C.gold},${C.goldL})`, borderRadius: 2, margin: '20px auto 0' }} />
+}
+
+function CheckIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="12" cy="12" r="11" fill={C.gold} opacity=".18"/>
+      <path d="M8 12l3 3 5-5" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const [zip, setZip] = useState('')
 
-  return (
-    <div className="grain min-h-screen bg-dark-900 overflow-hidden">
+  const TICKER_ITEMS = [
+    'Real County Records','Skip Traced Leads','Phone + Email + Address',
+    'DNC Scrubbed','Pre-Foreclosure Filings','24-Hour Delivery',
+    'Georgia Coverage','Tracerfy Enrichment','CSV Download',
+    'GHL Push','Day-Of Filing Freshness',
+  ]
 
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 border-b border-dark-600/60 backdrop-blur-sm bg-dark-900/85">
-        <BrandLogo size="md" />
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
-            Sign in
-          </Link>
+  const font = 'Lato,sans-serif'
+  const titleFont = 'Montserrat,sans-serif'
+
+  return (
+    <div style={{ fontFamily: font, background: C.bg, minHeight: '100vh', color: C.text }}>
+
+      {/* ─── Gold top accent bar ─── */}
+      <div style={{ position:'fixed', top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,transparent,${C.gold},transparent)`, opacity:.6, zIndex:1001, pointerEvents:'none' }}/>
+
+      {/* ─── Nav ─── */}
+      <nav style={{ position:'fixed', top:3, left:0, right:0, zIndex:1000, padding:'14px 40px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'rgba(6,17,28,.93)', backdropFilter:'blur(20px)', borderBottom:`1px solid ${C.border}` }}>
+        <BrandLogo />
+        <div style={{ display:'flex', alignItems:'center', gap:32 }}>
+          <Link href="/login" className="nav-link">Sign In</Link>
           <Link
             href="/login?signup=true"
-            className="text-sm bg-brand-500 hover:bg-brand-400 text-white px-4 py-2 rounded transition-colors font-semibold"
+            className="shimmer-btn"
+            style={{ padding:'11px 24px', borderRadius:4, fontSize:12, letterSpacing:'.08em', textTransform:'uppercase' }}
           >
-            Get Started
+            Get Started →
           </Link>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-36 pb-20 px-6 max-w-6xl mx-auto">
-        <div className="text-center">
+      {/* ─── Hero ─── */}
+      <section style={{ minHeight:'100vh', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center', padding:'140px 24px 80px', position:'relative', overflow:'hidden' }}>
+        {/* grid overlay */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:`linear-gradient(${C.border} 1px,transparent 1px),linear-gradient(90deg,${C.border} 1px,transparent 1px)`, backgroundSize:'72px 72px', opacity:.35, pointerEvents:'none' }}/>
+        {/* radial gradient */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:`radial-gradient(ellipse at 50% 30%,${C.navy}90 0%,transparent 65%)`, pointerEvents:'none' }}/>
 
+        <div style={{ position:'relative', zIndex:1, maxWidth:860 }}>
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-dark-700 border border-dark-600 rounded-full px-4 py-1.5 mb-10">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-sm text-gray-300 font-body">Fresh leads pulled daily from county records</span>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'7px 20px', borderRadius:3, border:`1px solid ${C.gold}30`, background:`${C.gold}0d`, fontSize:11, fontWeight:700, color:C.gold, marginBottom:32, fontFamily:titleFont, letterSpacing:'.1em', textTransform:'uppercase' }}>
+            <span className="sparkle" style={{ width:6, height:6, borderRadius:'50%', background:C.green, display:'inline-block', flexShrink:0 }}/>
+            Fresh pre-foreclosure leads pulled daily from county records
           </div>
 
           {/* Headline */}
-          <h1 className="font-display font-black leading-tight tracking-tight mb-6">
-            <span className="block text-6xl md:text-8xl text-white">PRE-FORECLOSURE</span>
-            <span className="block text-6xl md:text-8xl text-brand-500">LEADS</span>
-            <span className="block text-6xl md:text-8xl text-white">THAT HIT.</span>
+          <h1 style={{ fontFamily:titleFont, fontSize:'clamp(40px,6.5vw,74px)', fontWeight:900, lineHeight:1.05, color:C.white, marginBottom:28, letterSpacing:'-0.02em' }}>
+            Pre-Foreclosure<br/>Leads That<br/><span style={{ color:C.gold }}>Hit.</span>
           </h1>
 
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-body">
-            Enter a zip code. Get 200–500 verified pre-foreclosure leads with owner contact info delivered to your inbox in 24 hours. No stale databases. No recycled lists.
+          <p style={{ fontSize:'clamp(16px,2vw,19px)', color:C.muted, maxWidth:600, margin:'0 auto 44px', lineHeight:1.75, fontFamily:font, fontWeight:300 }}>
+            Enter a zip code. Get 200–500 verified pre-foreclosure leads with owner phone, email, and mailing address — delivered in 24 hours. No stale databases. No recycled lists.
           </p>
 
           {/* ZIP capture */}
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-5">
+          <div style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap', marginBottom:16 }}>
             <input
               type="text"
-              placeholder="Enter a zip code..."
+              placeholder="Enter zip code..."
               value={zip}
-              onChange={e => setZip(e.target.value.replace(/\D/g, '').slice(0, 5))}
+              onChange={e => setZip(e.target.value.replace(/\D/g,'').slice(0,5))}
               maxLength={5}
-              className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 transition-colors text-center font-display font-bold text-xl tracking-widest"
+              style={{ background:C.card, border:`1px solid ${C.borderM}`, borderRadius:4, padding:'16px 24px', color:C.white, fontSize:22, fontFamily:titleFont, fontWeight:800, letterSpacing:'.2em', textAlign:'center', outline:'none', width:210, transition:'border-color .2s' }}
+              onFocus={e  => { e.target.style.borderColor = C.gold }}
+              onBlur={e   => { e.target.style.borderColor = C.borderM }}
             />
             <Link
               href={`/login?signup=true${zip ? `&zip=${zip}` : ''}`}
-              className="bg-brand-500 hover:bg-brand-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
+              className="shimmer-btn"
+              style={{ padding:'16px 36px', borderRadius:4, fontSize:14, letterSpacing:'.08em', textTransform:'uppercase', display:'inline-flex', alignItems:'center' }}
             >
               Pull Leads →
             </Link>
           </div>
-          <p className="text-xs text-gray-600 font-body">No credit card required to get started</p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-6 mt-20 border-t border-dark-600 pt-12">
-          {[
-            { num: '200–500', label: 'Leads per zip code' },
-            { num: '24 hrs',  label: 'Delivery time' },
-            { num: 'Day-of',  label: 'Filing freshness' },
-          ].map((s, i) => (
-            <div key={i} className="text-center">
-              <div className="font-display font-black text-3xl md:text-5xl text-brand-500 mb-2">{s.num}</div>
-              <div className="text-gray-500 text-sm font-body">{s.label}</div>
-            </div>
-          ))}
+          <p style={{ fontSize:12, color:C.dim, letterSpacing:'.04em', fontFamily:font }}>No credit card required · 10 free leads on signup</p>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-20 px-6 bg-dark-800/60 border-y border-dark-600/50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-display font-black text-4xl md:text-5xl text-center mb-4 tracking-tight">
-            HOW IT <span className="text-brand-500">WORKS</span>
-          </h2>
-          <p className="text-center text-steel text-sm font-body mb-14">Three steps from zip code to close-ready leads.</p>
+      {/* ─── Ticker ─── */}
+      <div style={{ borderTop:`1px solid ${C.border}`, borderBottom:`1px solid ${C.border}`, background:C.card, padding:'14px 0', overflow:'hidden' }}>
+        <div className="ticker-track">
+          {[...Array(2)].map((_, rep) => (
+            <div key={rep} style={{ display:'flex', alignItems:'center', gap:40, paddingRight:40 }}>
+              {TICKER_ITEMS.map((t, i) => (
+                <div key={`${rep}-${i}`} style={{ display:'flex', alignItems:'center', gap:10, whiteSpace:'nowrap' }}>
+                  <div className="sparkle" style={{ width:5, height:5, borderRadius:'50%', background:C.gold, flexShrink:0 }}/>
+                  <span style={{ fontSize:12, fontWeight:600, color:C.muted, fontFamily:titleFont, letterSpacing:'.06em', textTransform:'uppercase' }}>{t}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="grid md:grid-cols-3 gap-10">
+      {/* ─── Stats ─── */}
+      <div style={{ padding:'48px 24px', background:C.bg }}>
+        <div style={{ maxWidth:960, margin:'0 auto', display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap' }}>
+          {[
+            { n:'200–500', l:'Leads per zip code',       icon:'📍', c:C.gold  },
+            { n:'24 hrs',  l:'Delivery time',             icon:'⚡', c:C.green },
+            { n:'$100',    l:'Per month, 500 credits',    icon:'💰', c:C.gold  },
+            { n:'Day-of',  l:'Filing freshness',          icon:'📋', c:C.gold  },
+          ].map(({ n, l, icon, c }) => (
+            <div key={l} style={{ flex:'1 1 160px', textAlign:'center', padding:'28px 16px', background:C.card, borderRadius:4, border:`1px solid ${C.border}` }}>
+              <div style={{ fontSize:22, marginBottom:8 }}>{icon}</div>
+              <div style={{ fontFamily:titleFont, fontSize: n.length > 5 ? 20 : 30, fontWeight:900, color:c }}>{n}</div>
+              <div style={{ fontSize:12, color:C.muted, marginTop:6, fontFamily:font, letterSpacing:'.04em', textTransform:'uppercase' }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ─── How it Works ─── */}
+      <section style={{ padding:'100px 24px', background:C.bgDeep }}>
+        <div style={{ maxWidth:1100, margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:64 }}>
+            <SectionLabel>Simple 3-Step Process</SectionLabel>
+            <h2 style={{ fontFamily:titleFont, fontSize:'clamp(28px,4vw,46px)', fontWeight:800, color:C.white, lineHeight:1.1, marginBottom:8, letterSpacing:'-0.01em' }}>
+              From Zip Code to<br/>Close-Ready Leads.
+            </h2>
+            <GoldLine/>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:24 }}>
             {[
-              {
-                step: '01',
-                title: 'Enter Your Zip',
-                desc: 'Type in any US zip code. We resolve it to the exact county automatically.',
-              },
-              {
-                step: '02',
-                title: 'We Pull & Enrich',
-                desc: 'Our system scrapes county public records for fresh NOD and Lis Pendens filings, then skip traces every lead for owner contact info.',
-              },
-              {
-                step: '03',
-                title: 'Leads Delivered',
-                desc: 'Within 24 hours your enriched lead list lands in your dashboard — download CSV or push straight to GHL.',
-              },
+              { step:'01', title:'Enter Your Zip',     desc:'Type in any US zip code. We resolve it to the exact county automatically using census data.' },
+              { step:'02', title:'We Pull & Enrich',   desc:'Our scraper pulls fresh NOD and Lis Pendens filings from county public records, then skip traces every lead for phone, email, and mailing address.' },
+              { step:'03', title:'Leads Delivered',    desc:'Within 24 hours your enriched, DNC-scrubbed lead list is ready in your dashboard. Download CSV or push directly to GHL.' },
             ].map((item, i) => (
-              <div key={i} className="relative pl-1">
-                <div className="font-display font-black text-6xl text-dark-600 mb-3 leading-none">{item.step}</div>
-                <div className="w-8 h-0.5 bg-brand-500 mb-3" />
-                <h3 className="font-display font-bold text-xl text-white mb-2 tracking-wide">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed font-body">{item.desc}</p>
+              <div key={i} className="feature-card" style={{ padding:'36px 32px', background:C.card, borderRadius:4, position:'relative', overflow:'hidden' }}>
+                {/* top color bar */}
+                <div style={{ position:'absolute', top:0, left:0, width:'100%', height:3, background:`linear-gradient(90deg,${C.gold}80,transparent)` }}/>
+                <div style={{ fontFamily:titleFont, fontSize:56, fontWeight:900, color:C.border, lineHeight:1, marginBottom:12 }}>{item.step}</div>
+                <div style={{ width:32, height:3, background:C.gold, borderRadius:2, marginBottom:16 }}/>
+                <h3 style={{ fontFamily:titleFont, fontSize:18, fontWeight:800, color:C.white, marginBottom:12, letterSpacing:'-.01em' }}>{item.title}</h3>
+                <p style={{ fontSize:14, color:C.muted, lineHeight:1.75, fontFamily:font, fontWeight:300 }}>{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="py-24 px-6">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="font-display font-black text-4xl md:text-5xl text-center mb-3 tracking-tight">
-            ONE PLAN. <span className="text-brand-500">NO NONSENSE.</span>
-          </h2>
-          <p className="text-gray-500 text-center mb-12 font-body">Everything you need to run your wholesale operation.</p>
-
-          <div className="bg-dark-800 border border-brand-500/40 rounded-2xl p-8 glow-orange relative">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-500 text-white text-xs font-bold px-4 py-1 rounded-full tracking-wider">
+      {/* ─── Pricing ─── */}
+      <section style={{ padding:'100px 24px', background:C.bg }}>
+        <div style={{ maxWidth:560, margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:48 }}>
+            <SectionLabel>Pricing</SectionLabel>
+            <h2 style={{ fontFamily:titleFont, fontSize:'clamp(28px,4vw,46px)', fontWeight:800, color:C.white, lineHeight:1.1, letterSpacing:'-0.01em' }}>
+              One Plan.<br/>No Nonsense.
+            </h2>
+            <GoldLine/>
+          </div>
+          <div className="glow-card" style={{ background:C.card, border:`1px solid ${C.gold}35`, borderRadius:4, padding:'40px 36px', position:'relative' }}>
+            <div style={{ position:'absolute', top:-14, left:'50%', transform:'translateX(-50%)', background:C.gold, color:C.bg, fontSize:11, fontWeight:800, padding:'5px 16px', borderRadius:3, letterSpacing:'.1em', fontFamily:titleFont, whiteSpace:'nowrap' }}>
               MOST POPULAR
             </div>
-
-            <div className="flex items-end gap-2 mb-6">
-              <span className="font-display font-black text-6xl text-white">$100</span>
-              <span className="text-gray-500 mb-2 font-body">/month</span>
+            <div style={{ display:'flex', alignItems:'flex-end', gap:8, marginBottom:8 }}>
+              <span style={{ fontFamily:titleFont, fontSize:64, fontWeight:900, color:C.white, lineHeight:1 }}>$100</span>
+              <span style={{ color:C.muted, fontFamily:font, marginBottom:8 }}>/month</span>
             </div>
-
-            <ul className="space-y-3 mb-8">
+            <p style={{ fontSize:13, color:C.muted, marginBottom:28, fontFamily:font }}>500 credits · 1 credit = 1 enriched, skip-traced lead</p>
+            <ul style={{ listStyle:'none', marginBottom:32 }}>
               {[
                 '500 verified leads per month',
                 'Fresh county record scraping',
-                'Full skip trace — phone, email, mailing address',
+                'Full skip trace — phone, email, address',
                 'DNC scrubbed automatically',
                 'CSV download + GHL push',
                 'Any US zip code',
-              ].map((feature, i) => (
-                <li key={i} className="flex items-center gap-3 text-gray-300 text-sm font-body">
-                  <span className="text-brand-500 font-bold text-base">✓</span>
-                  {feature}
+              ].map((f, i) => (
+                <li key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 0', borderBottom:`1px solid ${C.border}`, fontSize:14, color:C.text, fontFamily:font }}>
+                  <CheckIcon/>{f}
                 </li>
               ))}
             </ul>
-
             <Link
               href="/login?signup=true"
-              className="block w-full bg-brand-500 hover:bg-brand-400 text-white text-center py-3.5 rounded-lg font-semibold transition-colors"
+              className="shimmer-btn"
+              style={{ display:'block', width:'100%', textAlign:'center', padding:'16px', borderRadius:4, fontSize:13, letterSpacing:'.08em', textTransform:'uppercase' }}
             >
               Start Free Trial →
             </Link>
-            <p className="text-center text-xs text-gray-600 mt-3 font-body">10 free leads to try it out. No card needed.</p>
+            <p style={{ textAlign:'center', fontSize:12, color:C.dim, marginTop:12, fontFamily:font }}>10 free leads to try it out · No card needed</p>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-dark-600 py-10 px-6 text-center">
-        <div className="flex justify-center mb-4">
-          <BrandLogo size="lg" />
+      {/* ─── Footer ─── */}
+      <footer style={{ borderTop:`1px solid ${C.border}`, padding:'40px 24px', textAlign:'center', background:C.bgDeep }}>
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:16 }}>
+          <BrandLogo size="md"/>
         </div>
-        <p className="text-gray-600 text-xs font-body">© 2026 APEX. Built for serious wholesalers.</p>
+        <p style={{ color:C.dim, fontSize:12, fontFamily:font }}>© 2026 APEX. Built for serious wholesalers.</p>
       </footer>
 
     </div>

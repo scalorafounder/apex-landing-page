@@ -7,56 +7,148 @@
   --font-body: 'Lato', sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-html {
-  scroll-behavior: smooth;
-}
+/* Text selection */
+::selection { background: #EBAF4E; color: #06111C; }
 
-/* Custom scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #071629; }
-::-webkit-scrollbar-thumb { background: #244d85; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #E07820; }
+::-webkit-scrollbar-track { background: #06111C; }
+::-webkit-scrollbar-thumb { background: #1a2d3f; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #EBAF4E; }
 
-/* Grain overlay */
-.grain::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.35;
+/* ─── Keyframes ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes rotateIn {
+  from { opacity: 0; transform: translateY(20px) rotateX(-30deg); }
+  to   { opacity: 1; transform: translateY(0) rotateX(0);         }
+}
+@keyframes shimmerSlide {
+  0%   { background-position: -300% 0; }
+  100% { background-position:  300% 0; }
+}
+@keyframes glowGold {
+  0%, 100% { box-shadow: 0 0 20px rgba(235,175,78,.12); }
+  50%      { box-shadow: 0 0 40px rgba(235,175,78,.28); }
+}
+@keyframes ticker {
+  0%   { transform: translateX(0);    }
+  100% { transform: translateX(-50%); }
+}
+@keyframes sparkleAnim {
+  0%, 100% { opacity: .3; transform: scale(1);   }
+  50%      { opacity:  1; transform: scale(1.4); }
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1;  }
+  50%      { opacity: .4; }
 }
 
-/* Orange glow */
-.glow-orange {
-  box-shadow: 0 0 50px rgba(224, 120, 32, 0.18);
-}
+/* ─── Utility classes ─── */
+.fade-up    { animation: fadeInUp .6s ease both; }
+.sparkle    { animation: sparkleAnim 2s ease-in-out infinite; }
+.pulse-dot  { animation: pulseDot 1.5s ease-in-out infinite; }
+.glow-card  { animation: glowGold 3s ease-in-out infinite; }
 
-/* Shimmer loading */
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    #071629 25%,
-    #0c2040 50%,
-    #071629 75%
+/* ─── Shimmer CTA button ─── */
+.shimmer-btn {
+  background: #EBAF4E;
+  background-image: linear-gradient(
+    105deg,
+    transparent 0%, transparent 40%,
+    rgba(255,255,255,.65) 50%,
+    transparent 60%, transparent 100%
   );
-  background-size: 1000px 100%;
-  animation: shimmer 2s linear infinite;
+  background-size: 300% 100%;
+  animation: shimmerSlide 6s linear infinite;
+  color: #06111C !important;
+  text-decoration: none !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+  display: inline-block;
+}
+.shimmer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(235,175,78,.28);
+}
+.shimmer-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  animation: none;
+  transform: none;
 }
 
-/* Status badges */
-.status-queued   { @apply bg-dark-600 text-gray-400; }
-.status-scraping { @apply bg-blue-900/40 text-blue-400; }
-.status-tracing  { @apply bg-purple-900/40 text-purple-400; }
-.status-complete { @apply bg-green-900/40 text-green-400; }
-.status-failed   { @apply bg-red-900/40 text-red-400; }
-
-/* Montserrat display — force bold weight */
-.font-display {
-  font-weight: 700;
+/* ─── Outline button ─── */
+.outline-btn {
+  background: transparent;
+  border: 2px solid #1e3448;
+  color: #F0F4F8;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: all .2s ease;
+  display: inline-block;
 }
+.outline-btn:hover {
+  border-color: rgba(235,175,78,.4);
+  transform: translateY(-2px);
+}
+
+/* ─── Ticker ─── */
+.ticker-track {
+  display: flex;
+  animation: ticker 28s linear infinite;
+  width: max-content;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+/* ─── Feature / job cards ─── */
+.feature-card {
+  transition: all .3s ease;
+  border: 1px solid #152435;
+}
+.feature-card:hover {
+  border-color: rgba(235,175,78,.25) !important;
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(235,175,78,.08);
+}
+
+.job-row {
+  transition: all .2s ease;
+}
+.job-row:hover {
+  border-color: rgba(235,175,78,.2) !important;
+  background: #0d2035 !important;
+}
+
+/* ─── Status badges ─── */
+.status-queued   { background: rgba(21,36,53,.8); color: #6a8090; }
+.status-scraping { background: rgba(37,99,235,.15); color: #93c5fd; }
+.status-tracing  { background: rgba(147,51,234,.15); color: #c4b5fd; }
+.status-complete { background: rgba(62,207,142,.12); color: #3ecf8e; }
+.status-failed   { background: rgba(224,82,82,.12); color: #e05252; }
+
+/* ─── Montserrat display bold ─── */
+.font-display { font-weight: 700; }
+
+/* ─── Nav link ─── */
+.nav-link {
+  color: #8a9bab;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  transition: color .2s;
+  font-family: 'Montserrat', sans-serif;
+}
+.nav-link:hover { color: #EBAF4E; }
