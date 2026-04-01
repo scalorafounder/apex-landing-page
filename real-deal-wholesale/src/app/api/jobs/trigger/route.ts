@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import { createAdminSupabaseClient } from '@/lib/supabase-server'
 
-// Allow up to 5 minutes for the full scrape + skip-trace pipeline
 export const maxDuration = 300
 
 export async function POST(req: NextRequest) {
-  const { jobId, zip, count } = await req.json()
+  const { jobId, zip, count, leadTypes, propertyType, contactReq, ghlPush } = await req.json()
 
   if (!jobId || !zip || !count) {
     return NextResponse.json({ error: 'Missing params' }, { status: 400 })
@@ -14,22 +13,37 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminSupabaseClient()
 
-  // Immediately move to scraping so the UI updates
   await supabase.from('jobs').update({ status: 'scraping' }).eq('id', jobId)
 
-  // waitUntil keeps the Vercel function alive until the job finishes
-  waitUntil(runScraperJob(jobId, zip, count, supabase))
+  waitUntil(runScraperJob(jobId, zip, count, leadTypes ?? ['nod','lis_pendens','nts'], propertyType ?? 'all', contactReq ?? 'any', ghlPush ?? false, supabase))
 
   return NextResponse.json({ ok: true })
 }
 
-async function runScraperJob(jobId: string, zip: string, count: number, supabase: any) {
+async function runScraperJob(
+  jobId: string,
+  zip: string,
+  count: number,
+  leadTypes: string[],
+  propertyType: string,
+  contactReq: string,
+  ghlPush: boolean,
+  supabase: any
+) {
   const SCRAPER_URL = process.env.SCRAPER_URL || 'http://localhost:3001'
 
   try {
-    // Call scraper for raw leads
-    const scrapeRes = await fetch(`${SCRAPER_URL}/leads?zip=${zip}&count=${count}`, {
-      signal: AbortSignal.timeout(120000), // 2 min
+    // Build query string with new params (scraper will use what it understands)
+    const params = new URLSearchParams({
+      zip,
+      count: String(count),
+      lead_types: leadTypes.join(','),
+      property_type: propertyType,
+      contact_req: contactReq,
+    })
+
+    const scrapeRes = await fetch(`${SCRAPER_URL}/leads?${params}`, {
+      signal: AbortSignal.timeout(120000),
     })
 
     if (!scrapeRes.ok) {
@@ -48,9 +62,16 @@ async function runScraperJob(jobId: string, zip: string, count: number, supabase
       lead_count: scrapeData.lead_count,
     }).eq('id', jobId)
 
-    // Skip trace + DNC scrub via enrich endpoint
-    const enrichRes = await fetch(`${SCRAPER_URL}/leads/enrich?zip=${zip}&count=${count}`, {
-      signal: AbortSignal.timeout(300000), // 5 min
+    const enrichParams = new URLSearchParams({
+      zip,
+      count: String(count),
+      lead_types: leadTypes.join(','),
+      property_type: propertyType,
+      contact_req: contactReq,
+    })
+
+    const enrichRes = await fetch(`${SCRAPER_URL}/leads/enrich?${enrichParams}`, {
+      signal: AbortSignal.timeout(300000),
     })
 
     if (!enrichRes.ok) {

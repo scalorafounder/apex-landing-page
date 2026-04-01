@@ -140,6 +140,49 @@ html { scroll-behavior: smooth; }
 /* ─── Montserrat display bold ─── */
 .font-display { font-weight: 700; }
 
+/* ─── Wizard step transition ─── */
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.step-in { animation: stepIn .35s cubic-bezier(.22,.68,0,1.2) both; }
+
+/* ─── AI typing dots ─── */
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0);    opacity: .4; }
+  40%           { transform: translateY(-6px); opacity: 1;  }
+}
+.typing-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #EBAF4E; animation: dotBounce 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay: .15s; }
+.typing-dot:nth-child(3) { animation-delay: .30s; }
+
+/* ─── Wizard progress bar ─── */
+.wizard-progress-track { height: 2px; background: #152435; border-radius: 2px; overflow: hidden; }
+.wizard-progress-fill  { height: 100%; background: linear-gradient(90deg, #EBAF4E, #f5cc7f); border-radius: 2px; transition: width .4s cubic-bezier(.22,.68,0,1.2); }
+
+/* ─── Lead type card ─── */
+.lead-type-card { transition: all .2s ease; cursor: pointer; }
+.lead-type-card:hover { border-color: rgba(235,175,78,.35) !important; transform: translateY(-3px); box-shadow: 0 8px 28px rgba(235,175,78,.07); }
+.lead-type-card.selected { border-color: #EBAF4E !important; background: rgba(235,175,78,.06) !important; }
+
+/* ─── Count pill ─── */
+.count-pill { transition: all .15s ease; cursor: pointer; }
+.count-pill:hover  { border-color: rgba(235,175,78,.5) !important; }
+.count-pill.active { background: #EBAF4E !important; border-color: #EBAF4E !important; color: #06111C !important; font-weight: 800; }
+
+/* ─── Option pill (property / contact) ─── */
+.option-pill { transition: all .15s ease; cursor: pointer; }
+.option-pill:hover  { border-color: rgba(235,175,78,.4) !important; color: #F0F4F8 !important; }
+.option-pill.active { background: rgba(235,175,78,.1) !important; border-color: #EBAF4E !important; color: #EBAF4E !important; }
+
+/* ─── Sidebar job card ─── */
+.sidebar-job { transition: all .2s ease; cursor: default; }
+.sidebar-job:hover { border-color: rgba(235,175,78,.18) !important; background: #0d2035 !important; }
+
+/* ─── Countdown text ─── */
+@keyframes countFade { 0%,100%{opacity:.5} 50%{opacity:1} }
+.countdown-text { animation: countFade 1s ease-in-out infinite; }
+
 /* ─── Nav link ─── */
 .nav-link {
   color: #8a9bab;
