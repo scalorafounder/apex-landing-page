@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { createAdminSupabaseClient } from '@/lib/supabase-server'
+
+// Allow up to 5 minutes for the full scrape + skip-trace pipeline
+export const maxDuration = 300
 
 export async function POST(req: NextRequest) {
   const { jobId, zip, count } = await req.json()
@@ -10,11 +14,11 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminSupabaseClient()
 
-  // Update job to scraping
+  // Immediately move to scraping so the UI updates
   await supabase.from('jobs').update({ status: 'scraping' }).eq('id', jobId)
 
-  // Fire and forget — run the scraper async
-  runScraperJob(jobId, zip, count, supabase)
+  // waitUntil keeps the Vercel function alive until the job finishes
+  waitUntil(runScraperJob(jobId, zip, count, supabase))
 
   return NextResponse.json({ ok: true })
 }
@@ -23,12 +27,9 @@ async function runScraperJob(jobId: string, zip: string, count: number, supabase
   const SCRAPER_URL = process.env.SCRAPER_URL || 'http://localhost:3001'
 
   try {
-    // Update to scraping
-    await supabase.from('jobs').update({ status: 'scraping' }).eq('id', jobId)
-
     // Call scraper for raw leads
     const scrapeRes = await fetch(`${SCRAPER_URL}/leads?zip=${zip}&count=${count}`, {
-      signal: AbortSignal.timeout(120000) // 2 min timeout
+      signal: AbortSignal.timeout(120000), // 2 min
     })
 
     if (!scrapeRes.ok) {
@@ -38,9 +39,8 @@ async function runScraperJob(jobId: string, zip: string, count: number, supabase
 
     const scrapeData = await scrapeRes.json()
     const county = scrapeData.county?.county_name || ''
-    const state = scrapeData.county?.state_abbr || ''
+    const state  = scrapeData.county?.state_abbr  || ''
 
-    // Update with county info and move to tracing
     await supabase.from('jobs').update({
       status: 'tracing',
       county,
@@ -48,9 +48,9 @@ async function runScraperJob(jobId: string, zip: string, count: number, supabase
       lead_count: scrapeData.lead_count,
     }).eq('id', jobId)
 
-    // Call enrich endpoint for skip tracing
+    // Skip trace + DNC scrub via enrich endpoint
     const enrichRes = await fetch(`${SCRAPER_URL}/leads/enrich?zip=${zip}&count=${count}`, {
-      signal: AbortSignal.timeout(300000) // 5 min timeout for Tracerfy
+      signal: AbortSignal.timeout(300000), // 5 min
     })
 
     if (!enrichRes.ok) {
@@ -60,7 +60,6 @@ async function runScraperJob(jobId: string, zip: string, count: number, supabase
 
     const enrichData = await enrichRes.json()
 
-    // Mark complete
     await supabase.from('jobs').update({
       status: 'complete',
       lead_count: enrichData.lead_count,
