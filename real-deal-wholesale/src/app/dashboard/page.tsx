@@ -242,9 +242,45 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData()
-    const iv = setInterval(loadData, 15000)
-    return () => clearInterval(iv)
-  }, [loadData])
+
+    // Supabase Realtime — instant sidebar updates when scraper changes job status
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      channel = supabase
+        .channel('jobs-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event:  'UPDATE',
+            schema: 'public',
+            table:  'jobs',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            setJobs(prev => prev.map(j => j.id === payload.new.id ? { ...j, ...payload.new } as Job : j))
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event:  'INSERT',
+            schema: 'public',
+            table:  'jobs',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => { loadData() }
+        )
+        .subscribe()
+    })
+
+    // Fallback poll every 30s (in case Realtime misses something)
+    const iv = setInterval(loadData, 30000)
+    return () => {
+      clearInterval(iv)
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [loadData, supabase])
 
   // Typewriter effect
   useEffect(() => {
@@ -349,15 +385,33 @@ export default function DashboardPage() {
     setActiveJobId(job.id)
     loadData()
 
-    // Show AI typing dots for 1.8s then display message
-    setTimeout(() => {
-      setAiTyping(false)
-      const msg = buildAiMessage(county, leadTypes, count, propertyType, contactReq, ghlPush)
-      setAiMessage(msg)
-      setSubmitting(false)
-      // Start countdown after message finishes typing (~msg.length * 18ms + 2s buffer)
-      setTimeout(() => setCountdown(5), msg.length * 18 + 2000)
-    }, 1800)
+    // Call real Claude AI for market brief, show typing dots while waiting
+    const [aiRes] = await Promise.all([
+      fetch('/api/ai/brief', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          county:       county.county_name,
+          state:        county.state_abbr,
+          leadTypes,
+          count,
+          propertyType,
+          contactReq,
+        }),
+      }),
+      // Keep dots visible for at least 1.8s even if AI responds faster
+      new Promise(r => setTimeout(r, 1800)),
+    ])
+
+    setAiTyping(false)
+    setSubmitting(false)
+
+    const aiData = aiRes.ok ? await aiRes.json() : null
+    const msg    = aiData?.message || buildAiMessage(county, leadTypes, count, propertyType, contactReq, ghlPush)
+    setAiMessage(msg)
+
+    // Start countdown after typewriter finishes (~18ms/char + 2s buffer)
+    setTimeout(() => setCountdown(5), msg.length * 18 + 2000)
   }
 
   const signOut = async () => {
