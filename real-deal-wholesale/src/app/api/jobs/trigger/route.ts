@@ -108,6 +108,17 @@ async function runScraperJob(
       progress_log:      log,
     }).eq('id', jobId)
 
+    // Refund credits for leads not delivered (charged upfront for requested count)
+    const { data: jobRow } = await supabase.from('jobs').select('credits_used, user_id').eq('id', jobId).single()
+    if (jobRow && jobRow.credits_used > leadCount) {
+      const refund = jobRow.credits_used - leadCount
+      const { data: profile } = await supabase.from('profiles').select('credits').eq('id', jobRow.user_id).single()
+      if (profile) {
+        await supabase.from('profiles').update({ credits: profile.credits + refund }).eq('id', jobRow.user_id)
+        console.log(`Refunded ${refund} credits to user ${jobRow.user_id} (requested ${jobRow.credits_used}, delivered ${leadCount})`)
+      }
+    }
+
   } catch (err: any) {
     console.error('Job failed:', jobId, err.message)
     await pushLog(supabase, jobId, log, `Error: ${err.message}`)
