@@ -48,9 +48,19 @@ html { scroll-behavior: smooth; }
   0%, 100% { opacity: 1;  }
   50%      { opacity: .4; }
 }
+@keyframes logSlideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: .6; }
+  50%      { opacity: 0;  }
+}
 
 /* ─── Utility classes ─── */
 .fade-up    { animation: fadeInUp .6s ease both; }
+.log-entry-new { animation: logSlideIn .3s ease both; }
+.log-cursor    { animation: cursorBlink .9s ease-in-out infinite; }
 .sparkle    { animation: sparkleAnim 2s ease-in-out infinite; }
 .pulse-dot  { animation: pulseDot 1.5s ease-in-out infinite; }
 .glow-card  { animation: glowGold 3s ease-in-out infinite; }

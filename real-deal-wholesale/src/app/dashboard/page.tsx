@@ -15,6 +15,8 @@ type CountyInfo = {
   city: string
 }
 
+type LogEntry = { t: number; msg: string }
+
 type Job = {
   id: string
   zip_code: string
@@ -29,6 +31,7 @@ type Job = {
   contact_req: string | null
   tracerfy_download: string | null
   error_message: string | null
+  progress_log: LogEntry[] | null
   created_at: string
   completed_at: string | null
 }
@@ -838,11 +841,39 @@ export default function DashboardPage() {
             <div style={{ marginTop:8, fontSize:11, color:C.red, fontFamily:font }}>{job.error_message || 'Pipeline failed'}</div>
           )}
 
-          {job.status === 'scraping' && (
-            <div style={{ marginTop:8, fontSize:11, color:C.blue, fontFamily:font }}>Pulling from county records…</div>
-          )}
-          {job.status === 'tracing' && (
-            <div style={{ marginTop:8, fontSize:11, color:C.purple, fontFamily:font }}>Skip tracing {job.lead_count > 0 ? `${job.lead_count} leads` : ''}…</div>
+          {/* ── Progress log stream (active jobs only) ── */}
+          {isActive && job.progress_log && job.progress_log.length > 0 && (
+            <div style={{ marginTop:10, borderTop:`1px solid ${C.border}`, paddingTop:8 }}>
+              {job.progress_log.slice(-4).map((entry, i, arr) => {
+                const isLatest = i === arr.length - 1
+                return (
+                  <div
+                    key={entry.t}
+                    className={isLatest ? 'log-entry-new' : ''}
+                    style={{
+                      fontSize: 10,
+                      fontFamily: 'monospace',
+                      color: isLatest ? C.text : C.dim,
+                      lineHeight: 1.7,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 5,
+                      opacity: isLatest ? 1 : 0.55 - (arr.length - 1 - i) * 0.1,
+                    }}
+                  >
+                    <span style={{ color: isLatest ? C.gold : C.dim, flexShrink: 0, marginTop: 1 }}>›</span>
+                    <span>{entry.msg}</span>
+                  </div>
+                )
+              })}
+              {/* Blinking cursor on the latest line */}
+              {['scraping','tracing','queued'].includes(job.status) && (
+                <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:2 }}>
+                  <span style={{ color:C.dim, fontSize:10 }}>›</span>
+                  <span className="log-cursor" style={{ width:6, height:10, background:C.gold, opacity:.6, display:'inline-block', borderRadius:1 }}/>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

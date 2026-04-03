@@ -4,6 +4,14 @@ import { createAdminSupabaseClient } from '@/lib/supabase-server'
 
 export const maxDuration = 300
 
+type LogEntry = { t: number; msg: string }
+
+async function pushLog(supabase: any, jobId: string, current: LogEntry[], msg: string): Promise<LogEntry[]> {
+  const next = [...current, { t: Date.now(), msg }]
+  await supabase.from('jobs').update({ progress_log: next }).eq('id', jobId)
+  return next
+}
+
 export async function POST(req: NextRequest) {
   const { jobId, zip, count, leadTypes, propertyType, contactReq, ghlPush } = await req.json()
 
@@ -13,85 +21,98 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminSupabaseClient()
 
-  await supabase.from('jobs').update({ status: 'scraping' }).eq('id', jobId)
+  await supabase.from('jobs').update({
+    status:       'scraping',
+    progress_log: [{ t: Date.now(), msg: `Looking up zip code ${zip}...` }],
+  }).eq('id', jobId)
 
-  waitUntil(runScraperJob(jobId, zip, count, leadTypes ?? ['nod','lis_pendens','nts'], propertyType ?? 'all', contactReq ?? 'any', ghlPush ?? false, supabase))
+  waitUntil(runScraperJob(
+    jobId, zip, count,
+    leadTypes    ?? ['nod', 'lis_pendens', 'nts'],
+    propertyType ?? 'all',
+    contactReq   ?? 'any',
+    ghlPush      ?? false,
+    supabase
+  ))
 
   return NextResponse.json({ ok: true })
 }
 
 async function runScraperJob(
-  jobId: string,
-  zip: string,
-  count: number,
-  leadTypes: string[],
+  jobId:        string,
+  zip:          string,
+  count:        number,
+  leadTypes:    string[],
   propertyType: string,
-  contactReq: string,
-  ghlPush: boolean,
-  supabase: any
+  contactReq:   string,
+  ghlPush:      boolean,
+  supabase:     any,
 ) {
-  const SCRAPER_URL = process.env.SCRAPER_URL || 'http://localhost:3001'
+  const SCRAPER_URL = process.env.SCRAPER_URL || 'https://cralluxs-mac-mini.taileb7047.ts.net'
+
+  let log: LogEntry[] = [{ t: Date.now(), msg: `Looking up zip code ${zip}...` }]
 
   try {
-    // Build query string with new params (scraper will use what it understands)
+    // ── Log: connecting ──
+    log = await pushLog(supabase, jobId, log, 'Connecting to county records portal...')
+
     const params = new URLSearchParams({
       zip,
-      count: String(count),
-      lead_types: leadTypes.join(','),
+      count:         String(count),
+      lead_types:    leadTypes.join(','),
       property_type: propertyType,
-      contact_req: contactReq,
+      contact_req:   contactReq,
     })
 
-    const scrapeRes = await fetch(`${SCRAPER_URL}/leads?${params}`, {
-      signal: AbortSignal.timeout(120000),
+    log = await pushLog(supabase, jobId, log, 'Scraping pre-foreclosure filings...')
+
+    // Estimate ~90s for scraping to finish; flip status to 'tracing' mid-run
+    const midTimer = setTimeout(async () => {
+      await supabase.from('jobs').update({ status: 'tracing' }).eq('id', jobId)
+      await pushLog(supabase, jobId, log, 'Records collected — running skip trace...')
+    }, 90_000)
+
+    // ── Single call: scrape + skip-trace (no double-scrape) ──
+    const enrichRes = await fetch(`${SCRAPER_URL}/leads/enrich?${params}`, {
+      signal: AbortSignal.timeout(290_000),
     })
 
-    if (!scrapeRes.ok) {
-      const err = await scrapeRes.json()
-      throw new Error(err.error || 'Scraper failed')
-    }
-
-    const scrapeData = await scrapeRes.json()
-    const county = scrapeData.county?.county_name || ''
-    const state  = scrapeData.county?.state_abbr  || ''
-
-    await supabase.from('jobs').update({
-      status: 'tracing',
-      county,
-      state,
-      lead_count: scrapeData.lead_count,
-    }).eq('id', jobId)
-
-    const enrichParams = new URLSearchParams({
-      zip,
-      count: String(count),
-      lead_types: leadTypes.join(','),
-      property_type: propertyType,
-      contact_req: contactReq,
-    })
-
-    const enrichRes = await fetch(`${SCRAPER_URL}/leads/enrich?${enrichParams}`, {
-      signal: AbortSignal.timeout(300000),
-    })
+    clearTimeout(midTimer)
 
     if (!enrichRes.ok) {
-      const err = await enrichRes.json()
-      throw new Error(err.error || 'Skip tracing failed')
+      const err = await enrichRes.json().catch(() => ({}))
+      throw new Error((err as any).error || `Scraper HTTP ${enrichRes.status}`)
     }
 
-    const enrichData = await enrichRes.json()
+    const enrichData: any = await enrichRes.json()
+    const county    = enrichData.county?.county_name || ''
+    const state     = enrichData.county?.state_abbr  || ''
+    const leadCount = enrichData.lead_count || 0
+
+    log = await pushLog(supabase, jobId, log, `Found ${leadCount} lead${leadCount !== 1 ? 's' : ''} — skip tracing contacts...`)
+    await supabase.from('jobs').update({ status: 'tracing', county, state, lead_count: leadCount }).eq('id', jobId)
+
+    if (!enrichData.tracerfy_download) {
+      throw new Error('Skip trace completed but no download URL returned')
+    }
+
+    log = await pushLog(supabase, jobId, log, `✓ ${leadCount} leads skip-traced and ready`)
 
     await supabase.from('jobs').update({
-      status: 'complete',
-      lead_count: enrichData.lead_count,
+      status:            'complete',
+      lead_count:        leadCount,
+      county,
+      state,
       tracerfy_download: enrichData.tracerfy_download,
-      completed_at: new Date().toISOString(),
+      completed_at:      new Date().toISOString(),
+      progress_log:      log,
     }).eq('id', jobId)
 
   } catch (err: any) {
     console.error('Job failed:', jobId, err.message)
+    await pushLog(supabase, jobId, log, `Error: ${err.message}`)
     await supabase.from('jobs').update({
-      status: 'failed',
+      status:        'failed',
       error_message: err.message,
     }).eq('id', jobId)
   }
