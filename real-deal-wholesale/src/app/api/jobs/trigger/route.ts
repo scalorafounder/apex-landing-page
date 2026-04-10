@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import { createAdminSupabaseClient } from '@/lib/supabase-server'
 
-export const maxDuration = 300
+export const maxDuration = 800
 
 type LogEntry = { t: number; msg: string }
 
@@ -66,34 +66,53 @@ async function runScraperJob(
 
     log = await pushLog(supabase, jobId, log, 'Scraping pre-foreclosure filings...')
 
-    // Estimate ~90s for scraping to finish; flip status to 'tracing' mid-run
-    const midTimer = setTimeout(async () => {
-      await supabase.from('jobs').update({ status: 'tracing' }).eq('id', jobId)
-      await pushLog(supabase, jobId, log, 'Records collected — running skip trace...')
-    }, 90_000)
-
-    // ── Single call: scrape + skip-trace (no double-scrape) ──
-    const enrichRes = await fetch(`${SCRAPER_URL}/leads/enrich?${params}`, {
-      signal: AbortSignal.timeout(290_000),
+    // ── Start async job on Mac Mini (returns immediately with jobId) ──
+    const startRes = await fetch(`${SCRAPER_URL}/enrich/start?${params}`, {
+      signal: AbortSignal.timeout(15_000),
     })
+    if (!startRes.ok) {
+      const err = await startRes.json().catch(() => ({}))
+      throw new Error((err as any).error || `Scraper HTTP ${startRes.status}`)
+    }
+    const { jobId: scraperJobId } = await startRes.json()
+    log = await pushLog(supabase, jobId, log, `Job started (id: ${scraperJobId}) — scraping...`)
 
-    clearTimeout(midTimer)
+    // ── Poll for completion (max 12 min, every 20s) ──
+    let enrichData: any = null
+    let county = '', state = '', leadCount = 0
+    for (let attempt = 0; attempt < 36; attempt++) {
+      await new Promise(r => setTimeout(r, 20_000))
+      const pollRes = await fetch(`${SCRAPER_URL}/enrich/status/${scraperJobId}`, {
+        signal: AbortSignal.timeout(10_000),
+      }).catch(() => null)
+      if (!pollRes || !pollRes.ok) continue
+      const job: any = await pollRes.json()
 
-    if (!enrichRes.ok) {
-      const err = await enrichRes.json().catch(() => ({}))
-      throw new Error((err as any).error || `Scraper HTTP ${enrichRes.status}`)
+      // Update Supabase status to reflect scraper progress
+      if (job.status === 'tracing' && job.county) {
+        county = job.county.county_name || ''
+        state  = job.county.state_abbr  || ''
+        await supabase.from('jobs').update({ status: 'tracing', county, state }).eq('id', jobId)
+        log = await pushLog(supabase, jobId, log, 'Records collected — running skip trace...')
+      }
+      if (job.status === 'complete' || job.status === 'failed') {
+        enrichData = job
+        break
+      }
     }
 
-    const enrichData: any = await enrichRes.json()
-    const county    = enrichData.county?.county_name || ''
-    const state     = enrichData.county?.state_abbr  || ''
-    const leadCount = enrichData.lead_count || 0
+    if (!enrichData) throw new Error('Scraper job timed out after 12 minutes')
+    if (enrichData.status === 'failed') throw new Error(enrichData.error || 'Scraper job failed')
+
+    county    = enrichData.county?.county_name || county
+    state     = enrichData.county?.state_abbr  || state
+    leadCount = enrichData.lead_count || 0
 
     log = await pushLog(supabase, jobId, log, `Found ${leadCount} lead${leadCount !== 1 ? 's' : ''} — skip tracing contacts...`)
     await supabase.from('jobs').update({ status: 'tracing', county, state, lead_count: leadCount }).eq('id', jobId)
 
     if (!enrichData.tracerfy_download) {
-      throw new Error('Skip trace completed but no download URL returned')
+      throw new Error('Skip trace completed but no download URL returned — ' + (enrichData.message || 'no addresses found'))
     }
 
     log = await pushLog(supabase, jobId, log, `✓ ${leadCount} leads skip-traced and ready`)
