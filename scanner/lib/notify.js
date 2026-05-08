@@ -6,7 +6,7 @@
 
 import { supabase } from './supabase.js';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://real-deal-wholesale-ai.vercel.app';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://apex-landing-page-4abm.vercel.app';
 
 /**
  * Notify all enabled recipients about newly inserted leads.
