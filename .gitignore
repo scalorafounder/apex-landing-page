@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Builds
+.next/
+out/
+build/
+dist/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Env files (NEVER commit these — secrets live here)
+.env
+.env.local
+.env.*.local
+*/.env
+*/.env.local
+*/.env.*.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch / debug
+debug-*/
+/tmp/
+
+# Large data files (regenerated from MassGIS)
+data/*.gdb*
+data/*.zip
+data/raw/

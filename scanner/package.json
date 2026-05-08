@@ -1,0 +1,24 @@
+{
+  "name": "ma-distress-signal-scanner",
+  "version": "1.0.0",
+  "description": "Daily scanner for MA distress signals — Registry of Deeds + MassCourts + code violations",
+  "type": "module",
+  "scripts": {
+    "recon:masslandrecords": "node lib/recon_masslandrecords.js",
+    "scan:suffolk": "node registries/masslandrecords.js suffolk",
+    "scan:middlesex_south": "node registries/masslandrecords.js middlesex_south",
+    "scan:middlesex_north": "node registries/masslandrecords.js middlesex_north",
+    "scan:norfolk": "node registries/norfolk.js",
+    "scan:plymouth": "node registries/plymouth.js",
+    "scan:essex_south": "node registries/essex_south.js",
+    "scan:all": "node index.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0",
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "undici": "^7.1.0",
+    "cheerio": "^1.0.0"
+  }
+}

@@ -3,205 +3,45 @@
 @tailwind utilities;
 
 :root {
-  --font-display: 'Montserrat', sans-serif;
-  --font-body: 'Lato', sans-serif;
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #FAFAFA;
+  --hairline: rgba(24, 24, 27, 0.06);
+  --hairline-strong: rgba(24, 24, 27, 0.10);
+  --ink: #18181B;
+  --ink-muted: #71717A;
+  --accent: #E8A017;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-/* Text selection */
-::selection { background: #EBAF4E; color: #06111C; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #06111C; }
-::-webkit-scrollbar-thumb { background: #1a2d3f; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #EBAF4E; }
-
-/* ─── Keyframes ─── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0);    }
-}
-@keyframes rotateIn {
-  from { opacity: 0; transform: translateY(20px) rotateX(-30deg); }
-  to   { opacity: 1; transform: translateY(0) rotateX(0);         }
-}
-@keyframes shimmerSlide {
-  0%   { background-position: -300% 0; }
-  100% { background-position:  300% 0; }
-}
-@keyframes glowGold {
-  0%, 100% { box-shadow: 0 0 20px rgba(235,175,78,.12); }
-  50%      { box-shadow: 0 0 40px rgba(235,175,78,.28); }
-}
-@keyframes ticker {
-  0%   { transform: translateX(0);    }
-  100% { transform: translateX(-50%); }
-}
-@keyframes sparkleAnim {
-  0%, 100% { opacity: .3; transform: scale(1);   }
-  50%      { opacity:  1; transform: scale(1.4); }
-}
-@keyframes pulseDot {
-  0%, 100% { opacity: 1;  }
-  50%      { opacity: .4; }
-}
-@keyframes logSlideIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0);   }
-}
-@keyframes cursorBlink {
-  0%, 100% { opacity: .6; }
-  50%      { opacity: 0;  }
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Utility classes ─── */
-.fade-up    { animation: fadeInUp .6s ease both; }
-.log-entry-new { animation: logSlideIn .3s ease both; }
-.log-cursor    { animation: cursorBlink .9s ease-in-out infinite; }
-.sparkle    { animation: sparkleAnim 2s ease-in-out infinite; }
-.pulse-dot  { animation: pulseDot 1.5s ease-in-out infinite; }
-.glow-card  { animation: glowGold 3s ease-in-out infinite; }
-
-/* ─── Shimmer CTA button ─── */
-.shimmer-btn {
-  background: #EBAF4E;
-  background-image: linear-gradient(
-    105deg,
-    transparent 0%, transparent 40%,
-    rgba(255,255,255,.65) 50%,
-    transparent 60%, transparent 100%
-  );
-  background-size: 300% 100%;
-  animation: shimmerSlide 6s linear infinite;
-  color: #06111C !important;
-  text-decoration: none !important;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  border: none;
-  transition: transform .2s ease, box-shadow .2s ease;
-  display: inline-block;
-}
-.shimmer-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(235,175,78,.28);
-}
-.shimmer-btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-  animation: none;
-  transform: none;
+*::selection {
+  background: rgba(232, 160, 23, 0.22);
+  color: var(--ink);
 }
 
-/* ─── Outline button ─── */
-.outline-btn {
-  background: transparent;
-  border: 2px solid #1e3448;
-  color: #F0F4F8;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  text-decoration: none !important;
-  transition: all .2s ease;
-  display: inline-block;
+/* Subtle scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(24, 24, 27, 0.10);
+  border-radius: 8px;
+  border: 2px solid var(--bg);
 }
-.outline-btn:hover {
-  border-color: rgba(235,175,78,.4);
-  transform: translateY(-2px);
+::-webkit-scrollbar-thumb:hover { background: rgba(24, 24, 27, 0.20); }
+
+/* Hairline divider */
+.hairline { border-color: var(--hairline); }
+
+/* Apple-like focus ring */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
-
-/* ─── Ticker ─── */
-.ticker-track {
-  display: flex;
-  animation: ticker 28s linear infinite;
-  width: max-content;
-}
-.ticker-track:hover { animation-play-state: paused; }
-
-/* ─── Feature / job cards ─── */
-.feature-card {
-  transition: all .3s ease;
-  border: 1px solid #152435;
-}
-.feature-card:hover {
-  border-color: rgba(235,175,78,.25) !important;
-  transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(235,175,78,.08);
-}
-
-.job-row {
-  transition: all .2s ease;
-}
-.job-row:hover {
-  border-color: rgba(235,175,78,.2) !important;
-  background: #0d2035 !important;
-}
-
-/* ─── Status badges ─── */
-.status-queued   { background: rgba(21,36,53,.8); color: #6a8090; }
-.status-scraping { background: rgba(37,99,235,.15); color: #93c5fd; }
-.status-tracing  { background: rgba(147,51,234,.15); color: #c4b5fd; }
-.status-complete { background: rgba(62,207,142,.12); color: #3ecf8e; }
-.status-failed   { background: rgba(224,82,82,.12); color: #e05252; }
-
-/* ─── Montserrat display bold ─── */
-.font-display { font-weight: 700; }
-
-/* ─── Wizard step transition ─── */
-@keyframes stepIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.step-in { animation: stepIn .35s cubic-bezier(.22,.68,0,1.2) both; }
-
-/* ─── AI typing dots ─── */
-@keyframes dotBounce {
-  0%, 80%, 100% { transform: translateY(0);    opacity: .4; }
-  40%           { transform: translateY(-6px); opacity: 1;  }
-}
-.typing-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #EBAF4E; animation: dotBounce 1.2s ease-in-out infinite; }
-.typing-dot:nth-child(2) { animation-delay: .15s; }
-.typing-dot:nth-child(3) { animation-delay: .30s; }
-
-/* ─── Wizard progress bar ─── */
-.wizard-progress-track { height: 2px; background: #152435; border-radius: 2px; overflow: hidden; }
-.wizard-progress-fill  { height: 100%; background: linear-gradient(90deg, #EBAF4E, #f5cc7f); border-radius: 2px; transition: width .4s cubic-bezier(.22,.68,0,1.2); }
-
-/* ─── Lead type card ─── */
-.lead-type-card { transition: all .2s ease; cursor: pointer; }
-.lead-type-card:hover { border-color: rgba(235,175,78,.35) !important; transform: translateY(-3px); box-shadow: 0 8px 28px rgba(235,175,78,.07); }
-.lead-type-card.selected { border-color: #EBAF4E !important; background: rgba(235,175,78,.06) !important; }
-
-/* ─── Count pill ─── */
-.count-pill { transition: all .15s ease; cursor: pointer; }
-.count-pill:hover  { border-color: rgba(235,175,78,.5) !important; }
-.count-pill.active { background: #EBAF4E !important; border-color: #EBAF4E !important; color: #06111C !important; font-weight: 800; }
-
-/* ─── Option pill (property / contact) ─── */
-.option-pill { transition: all .15s ease; cursor: pointer; }
-.option-pill:hover  { border-color: rgba(235,175,78,.4) !important; color: #F0F4F8 !important; }
-.option-pill.active { background: rgba(235,175,78,.1) !important; border-color: #EBAF4E !important; color: #EBAF4E !important; }
-
-/* ─── Sidebar job card ─── */
-.sidebar-job { transition: all .2s ease; cursor: default; }
-.sidebar-job:hover { border-color: rgba(235,175,78,.18) !important; background: #0d2035 !important; }
-
-/* ─── Countdown text ─── */
-@keyframes countFade { 0%,100%{opacity:.5} 50%{opacity:1} }
-.countdown-text { animation: countFade 1s ease-in-out infinite; }
-
-/* ─── Nav link ─── */
-.nav-link {
-  color: #8a9bab;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  transition: color .2s;
-  font-family: 'Montserrat', sans-serif;
-}
-.nav-link:hover { color: #EBAF4E; }
